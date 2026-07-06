@@ -1,0 +1,21 @@
+# Dependências
+node_modules/
+
+# Banco de dados SQLite (gerado em tempo de execução)
+backend/data/*.db
+backend/data/*.db-wal
+backend/data/*.db-shm
+
+# Uploads de usuários (fotos de alertas/diário/documentos)
+backend/data/uploads/
+
+# Ferramentas locais (ex.: cloudflared)
+.tools/
+
+# Build do frontend
+frontend/dist/
+
+# Sistema / editores
+.DS_Store
+*.log
+.vscode/

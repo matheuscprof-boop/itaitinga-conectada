@@ -1,0 +1,84 @@
+// Tela de login. Ao autenticar, chama onLogin(usuario).
+import { useState } from 'react';
+import { api } from '../api.js';
+
+export default function Login({ onLogin, onCadastrar, onPortal }) {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
+  const [entrando, setEntrando] = useState(false);
+
+  async function enviar(e) {
+    e.preventDefault();
+    setErro('');
+    setEntrando(true);
+    try {
+      const usuario = await api.login(email, senha);
+      onLogin(usuario);
+    } catch (err) {
+      setErro(err.message);
+    } finally {
+      setEntrando(false);
+    }
+  }
+
+  return (
+    <div className="tela-login">
+      <form className="card form form-login" onSubmit={enviar} aria-labelledby="titulo-login">
+        <h1 id="titulo-login">Entrar no Itaitinga Conectada</h1>
+        <p className="subtitulo-login">Acompanhamento estudantil e cidadania em Itaitinga</p>
+
+        {erro && (
+          <p className="alerta-erro" role="alert">
+            {erro}
+          </p>
+        )}
+
+        <div className="campo">
+          <label htmlFor="email">E-mail</label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="username"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        <div className="campo">
+          <label htmlFor="senha">Senha</label>
+          <input
+            id="senha"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+          />
+        </div>
+
+        <button type="submit" className="btn btn--primario" disabled={entrando}>
+          {entrando ? 'Entrando…' : 'Entrar'}
+        </button>
+
+        <p className="dica-login">
+          Acesso inicial: <strong>admin@saae.local</strong> / <strong>admin123</strong>
+        </p>
+
+        <div className="login-links">
+          {onCadastrar && (
+            <button type="button" className="link-voltar" onClick={onCadastrar}>
+              Criar conta
+            </button>
+          )}
+          {onPortal && (
+            <button type="button" className="link-voltar" onClick={onPortal}>
+              Ver alertas de infraestrutura
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
+  );
+}

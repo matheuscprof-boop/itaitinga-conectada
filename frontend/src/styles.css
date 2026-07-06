@@ -1,0 +1,669 @@
+/* =====================================================================
+   Estilos do SAAE
+   Prioridades: legibilidade, contraste (WCAG AA), foco visível e layout
+   responsivo. Paleta sóbria para uso escolar.
+   ===================================================================== */
+
+:root {
+  --cor-fundo: #f4f6f9;
+  --cor-superficie: #ffffff;
+  --cor-borda: #d5dbe3;
+  --cor-texto: #1c2530;
+  --cor-texto-suave: #55606e;
+  --cor-primaria: #1f5fbf;
+  --cor-primaria-escura: #17458c;
+  --cor-perigo: #b3261e;
+  --raio: 10px;
+  --sombra: 0 1px 3px rgba(20, 30, 45, 0.08), 0 1px 2px rgba(20, 30, 45, 0.06);
+  --fonte: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--fonte);
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  line-height: 1.5;
+}
+
+/* ---- Acessibilidade: foco sempre visível ---- */
+:focus-visible {
+  outline: 3px solid var(--cor-primaria);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Link "pular para o conteúdo": só aparece ao receber foco. */
+.pular-para-conteudo {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--cor-primaria);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  z-index: 100;
+}
+.pular-para-conteudo:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+/* ---- Cabeçalho e rodapé ---- */
+.cabecalho-app {
+  background: var(--cor-primaria-escura);
+  color: #fff;
+}
+.cabecalho-conteudo {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  flex-wrap: wrap;
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+}
+.subtitulo { margin: 0; color: #cddcf3; font-size: 0.95rem; }
+
+.conteudo {
+  max-width: 960px;
+  margin: 1.5rem auto;
+  padding: 0 1.25rem;
+}
+
+.rodape-app {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 1rem 1.25rem;
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ---- Cartões genéricos ---- */
+.card {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.secao-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.secao-cabecalho h2 { margin: 0; }
+
+/* ---- Cartões de métrica (resumo por eixo) ---- */
+.cards-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.card--metrica {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  border-left: 6px solid var(--cor-primaria);
+  margin: 0;
+}
+.metrica-valor { font-size: 2rem; font-weight: 800; line-height: 1; }
+.metrica-rotulo { color: var(--cor-texto-suave); margin-top: 0.25rem; }
+.metrica--frequencia { border-left-color: #b3261e; }
+.metrica--desempenho { border-left-color: #b8860b; }
+.metrica--socioemocional { border-left-color: #1f5fbf; }
+
+/* ---- Formulários ---- */
+.form h2, .form h3 { margin-top: 0; }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.campo { display: flex; flex-direction: column; margin-bottom: 1rem; }
+.campo label { font-weight: 600; margin-bottom: 0.35rem; font-size: 0.9rem; }
+.campo input,
+.campo select,
+.campo textarea {
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+  background: #fff;
+  color: inherit;
+  /* Permite que controles com largura intrínseca (file, number, select)
+     encolham em telas estreitas em vez de estourar as bordas. */
+  min-width: 0;
+  max-width: 100%;
+}
+.campo textarea { resize: vertical; }
+.campo--busca { max-width: 480px; }
+
+/* Atribuição de turmas ao professor (Gestão de usuários) */
+.turmas-responsavel {
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.75rem 1rem 0.5rem;
+  margin-bottom: 1rem;
+}
+.turmas-responsavel legend { font-weight: 600; padding: 0 0.4rem; }
+.turmas-responsavel .ajuda { margin: 0 0 0.6rem; font-size: 0.85rem; color: var(--cor-texto-suave, #555); }
+.turmas-opcoes { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; margin-bottom: 0.6rem; }
+.turma-check { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 500; }
+.turma-adicionar { display: flex; gap: 0.5rem; align-items: center; max-width: 360px; }
+.turma-adicionar input { flex: 1; }
+
+/* Marcadores de emoji no mapa (categorias de infraestrutura) */
+.marcador-emoji-wrap { background: transparent; border: 0; }
+.marcador-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  font-size: 20px;
+  line-height: 1;
+  background: #fff;
+  border: 2px solid var(--cor-borda, #cbd5e1);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+/* Legenda de categorias abaixo do mapa */
+.legenda-mapa {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  font-size: 0.9rem;
+}
+.legenda-mapa li { display: inline-flex; align-items: center; gap: 0.35rem; }
+.legenda-emoji { font-size: 1.1rem; }
+
+.form-acoes { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+/* ---- Botões ---- */
+.btn {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--cor-texto);
+  cursor: pointer;
+}
+.btn:hover { background: #eef1f6; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn--primario {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: #fff;
+}
+.btn--primario:hover { background: var(--cor-primaria-escura); }
+.btn--perigo { color: var(--cor-perigo); border-color: #e5b4b1; }
+.btn--perigo:hover { background: #fbecec; }
+.btn--pequeno { padding: 0.35rem 0.7rem; font-size: 0.85rem; }
+.btn--voltar { margin-bottom: 1rem; }
+
+/* ---- Listas ---- */
+.lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.lista-item-botao {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.lista-item-botao:hover { border-color: var(--cor-primaria); background: #f7f9fc; }
+.lista-item-botao strong { display: block; }
+.lista-item-sub { color: var(--cor-texto-suave); font-size: 0.85rem; }
+.contador-alertas {
+  background: #fbecec;
+  color: var(--cor-perigo);
+  border: 1px solid #e5b4b1;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.vazio { color: var(--cor-texto-suave); font-style: italic; padding: 0.5rem 0; }
+
+/* ---- Cartão de informações do aluno ---- */
+.lista-descricao {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem 1.5rem;
+  margin: 0;
+}
+.lista-descricao dt { color: var(--cor-texto-suave); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.lista-descricao dd { margin: 0.15rem 0 0; font-weight: 600; }
+.observacoes { margin-top: 1.25rem; border-top: 1px solid var(--cor-borda); padding-top: 1rem; }
+.observacoes h3 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+
+/* ---- Seção de alertas ---- */
+.detalhe-colunas {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1.2fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .detalhe-colunas { grid-template-columns: 1fr; }
+}
+
+/* ---- Responsivo: ajustes de tamanho para telas pequenas ----
+   A estrutura de duas faixas do cabeçalho já é padrão; aqui só compactamos
+   paddings/fontes para o celular. */
+@media (max-width: 720px) {
+  .cabecalho-conteudo { padding: 0.75rem 1rem; }
+  .logo { font-size: 1.25rem; }
+  .nav-item { padding: 0.45rem 0.7rem; }
+}
+
+/* Abas dos eixos do aluno (Alertas/Saúde/…) também roláveis, não quebram
+   em várias linhas nem cortam. */
+@media (max-width: 560px) {
+  .eixos-abas {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .eixo-aba { flex: 0 0 auto; white-space: nowrap; }
+}
+.eixo-titulo {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cor-texto-suave);
+}
+.card--alerta { padding: 0.9rem 1rem; margin: 0; }
+.alerta-topo { display: flex; justify-content: space-between; gap: 0.75rem; align-items: flex-start; flex-wrap: wrap; }
+.alerta-selos { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.alerta-descricao { margin: 0.5rem 0; color: var(--cor-texto-suave); }
+
+/* ---- Selos (badges) com contraste adequado ---- */
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+/* Nível de risco */
+.badge--nivel-baixo   { background: #e6f4ea; color: #1b5e2f; border-color: #b7dfc4; }
+.badge--nivel-medio   { background: #fdf3e0; color: #8a5a00; border-color: #f0d59b; }
+.badge--nivel-alto    { background: #fbecec; color: #8a1a15; border-color: #e5b4b1; }
+/* Status */
+.badge--status-aberto        { background: #eef2f8; color: #263a5c; border-color: #c6d2e6; }
+.badge--status-em_andamento  { background: #e7f0fd; color: #17458c; border-color: #b9d2f4; }
+.badge--status-resolvido     { background: #e6f4ea; color: #1b5e2f; border-color: #b7dfc4; }
+
+/* ---- Mensagem de erro ---- */
+.alerta-erro {
+  background: #fbecec;
+  border: 1px solid #e5b4b1;
+  color: #8a1a15;
+  padding: 0.7rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* Conteúdo só para leitores de tela. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+
+/* ---- Navegação e área do usuário no cabeçalho ----
+   Cabeçalho em duas faixas em qualquer largura: linha 1 = logo + usuário/Sair;
+   linha 2 = navegação ocupando a largura toda (quebra em várias linhas se
+   preciso). Como o conteúdo é limitado a 960px e há muitas abas, uma única
+   linha nunca coube bem — este layout evita a área do usuário "órfã". */
+.nav-principal { display: flex; gap: 0.15rem 0.35rem; flex-wrap: wrap; width: 100%; order: 3; margin-top: 0.25rem; }
+.nav-item {
+  font: inherit;
+  color: #cddcf3;
+  background: none;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.nav-item:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.nav-item--ativo { background: rgba(255, 255, 255, 0.18); color: #fff; font-weight: 700; }
+
+.usuario-box { display: flex; align-items: center; gap: 0.6rem; margin-left: auto; }
+.usuario-nome { color: #fff; font-size: 0.85rem; display: flex; flex-direction: column; line-height: 1.2; }
+.usuario-perfil { color: #cddcf3; font-size: 0.75rem; }
+
+/* ---- Tela de login ---- */
+.tela-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--cor-fundo);
+}
+.form-login { width: 100%; max-width: 380px; margin: 0; }
+.form-login h1 { margin: 0 0 0.25rem; }
+.subtitulo-login { margin: 0 0 1.25rem; color: var(--cor-texto-suave); font-size: 0.9rem; }
+.form-login .btn { width: 100%; margin-top: 0.5rem; }
+.dica-login {
+  margin: 1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--cor-texto-suave);
+  background: #f0f3f8;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+}
+
+/* ---- Linha do tempo (histórico do alerta) ---- */
+.linha-tempo { margin-top: 0.75rem; border-top: 1px solid var(--cor-borda); padding-top: 0.75rem; }
+.timeline { list-style: none; margin: 0 0 0.75rem; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.timeline-item { display: flex; gap: 0.6rem; align-items: flex-start; }
+.timeline-marca {
+  margin-top: 0.35rem;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--cor-primaria);
+}
+.timeline-marca--comentario { background: #6b7280; }
+.timeline-texto { margin: 0; }
+.timeline-meta { margin: 0.1rem 0 0; font-size: 0.75rem; color: var(--cor-texto-suave); }
+.form-comentario { display: flex; gap: 0.5rem; align-items: flex-start; }
+.form-comentario textarea { flex: 1; font: inherit; padding: 0.5rem; border: 1px solid var(--cor-borda); border-radius: 6px; resize: vertical; }
+
+/* ---- Relatórios ---- */
+.filtros { margin-bottom: 1rem; }
+.total-alertas { margin: 0.5rem 0 1rem; font-size: 1.05rem; }
+.grupos-metricas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.grupo-metrica h3 { margin: 0 0 0.75rem; font-size: 1rem; }
+.metrica-lista { margin: 0; }
+.metrica-linha { display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid #eef1f6; }
+.metrica-linha:last-child { border-bottom: none; }
+.metrica-linha dt { color: var(--cor-texto-suave); }
+.metrica-linha dd { margin: 0; font-weight: 700; }
+
+/* Rolagem horizontal para tabelas largas no celular (mesma ideia de
+   .heatmap-scroll / .line-scroll). */
+.tabela-scroll { overflow-x: auto; }
+.tabela { width: 100%; border-collapse: collapse; background: var(--cor-superficie); border: 1px solid var(--cor-borda); border-radius: var(--raio); overflow: hidden; }
+.tabela th, .tabela td { text-align: left; padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--cor-borda); }
+.tabela th { background: #f0f3f8; font-size: 0.85rem; }
+.tabela tr:last-child td { border-bottom: none; }
+
+/* Selo de perfil (usado na gestão de usuários) */
+.badge--perfil-professor   { background: #eef2f8; color: #263a5c; border-color: #c6d2e6; }
+.badge--perfil-coordenacao { background: #fdf3e0; color: #8a5a00; border-color: #f0d59b; }
+.badge--perfil-direcao     { background: #e7f0fd; color: #17458c; border-color: #b9d2f4; }
+
+/* Mensagem de sucesso */
+.alerta-sucesso {
+  background: #e6f4ea;
+  border: 1px solid #b7dfc4;
+  color: #1b5e2f;
+  padding: 0.7rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* ---- Gráfico de barras ---- */
+.grafico-barras { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.barra-linha { display: grid; grid-template-columns: 7rem 1fr 2rem; align-items: center; gap: 0.6rem; }
+.barra-rotulo { font-size: 0.85rem; color: var(--cor-texto-suave); }
+.barra-trilho { background: #eef1f6; border-radius: 999px; height: 14px; overflow: hidden; }
+.barra-preenchida { display: block; height: 100%; border-radius: 999px; min-width: 2px; }
+.barra-valor { font-weight: 700; text-align: right; font-size: 0.9rem; }
+
+/* ---- Lista de usuários ---- */
+.lista-item-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 0.85rem 1rem;
+  flex-wrap: wrap;
+}
+.lista-item-info strong { display: block; }
+/* Deixa o bloco de nome/e-mail encolher (e-mails longos quebram) em vez de
+   empurrar as ações (Editar/Remover) para fora da tela no celular. */
+.lista-item-info > div:first-child { min-width: 0; overflow-wrap: anywhere; }
+.usuario-acoes { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.marca-voce { font-size: 0.8rem; color: var(--cor-texto-suave); font-style: italic; }
+
+/* Contador no menu (ex.: notificações não lidas) */
+.contador-nav {
+  display: inline-block;
+  margin-left: 0.4rem;
+  min-width: 1.2rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #b3261e;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2rem;
+}
+
+/* ---- Notificações ---- */
+.card--notificacao { margin: 0; padding: 0.9rem 1rem; }
+.card--notificacao.nao-lida { border-left: 4px solid var(--cor-perigo); }
+.notif-topo { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.ponto-nao-lida { width: 10px; height: 10px; border-radius: 50%; background: var(--cor-perigo); flex-shrink: 0; }
+.notif-rodape { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.5rem; }
+
+/* ---- Controles dos gráficos (seletores/toggle) ---- */
+.controles-grafico { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.controles-grafico label { font-size: 0.85rem; color: var(--cor-texto-suave); }
+.controles-grafico select { font: inherit; padding: 0.35rem 0.5rem; border: 1px solid var(--cor-borda); border-radius: 6px; }
+.toggle { display: inline-flex; gap: 0.25rem; }
+
+/* ---- Gráfico de rosca ---- */
+.donut { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.donut-svg { width: 160px; height: 160px; flex-shrink: 0; }
+.donut-total { font-size: 1.6rem; font-weight: 800; fill: var(--cor-texto); }
+.donut-legenda { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; min-width: 12rem; }
+.donut-legenda li { display: flex; align-items: center; gap: 0.5rem; }
+.legenda-cor { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.legenda-rotulo { flex: 1; }
+.legenda-valor { color: var(--cor-texto-suave); font-size: 0.85rem; font-weight: 600; }
+
+/* ---- Gráfico de linha ---- */
+.line-scroll { overflow-x: auto; }
+.line-valor { font-size: 11px; font-weight: 700; fill: var(--cor-texto); }
+.line-rotulo { font-size: 11px; fill: var(--cor-texto-suave); }
+
+/* ---- Mapa de calor (heatmap) ---- */
+.heatmap-scroll { overflow-x: auto; }
+
+/* ===================================================================
+   Itaitinga Conectada — Infraestrutura/Cidadania e eixos do aluno
+   =================================================================== */
+
+/* Links auxiliares do login e botões de "voltar" */
+.login-links { display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+.link-voltar {
+  background: none; border: none; color: var(--cor-primaria);
+  cursor: pointer; text-decoration: underline; font: inherit; padding: 0.25rem;
+}
+.link-voltar:hover { color: var(--cor-primaria-escura); }
+.dica-campo { color: var(--cor-texto-suave); font-size: 0.82rem; margin: 0.35rem 0 0; }
+
+/* Portal do cidadão */
+/* minmax(0, 1fr) deixa a coluna encolher abaixo do min-content dos filhos
+   (senão o input[type=file] do formulário, que tem min-content largo, estoura
+   a trilha do grid e vaza pelas bordas no celular). */
+.portal-cidadao { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+.portal-cabecalho .subtitulo { color: var(--cor-texto-suave); margin: 0.25rem 0 0; }
+.aviso-publico { border-left: 6px solid var(--cor-primaria); }
+.aviso-publico .acoes { display: flex; gap: 0.75rem; margin-top: 0.75rem; flex-wrap: wrap; }
+.filtros-infra { display: flex; gap: 1rem; flex-wrap: wrap; align-items: end; }
+.filtros-infra label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; color: var(--cor-texto-suave); }
+
+/* Mapa Leaflet */
+.mapa-leaflet { border: 1px solid var(--cor-borda); }
+
+/* Localização da residência (Assistência): endereço + GPS + mapa */
+.geo-residencia { border: 1px solid var(--cor-borda); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
+.geo-residencia legend { font-weight: 600; padding: 0 0.4rem; }
+.geo-endereco { display: flex; gap: 0.5rem; align-items: center; }
+.geo-endereco input { flex: 1; }
+.ajuda { font-size: 0.85rem; color: var(--cor-texto-suave, #555); margin: 0.4rem 0 0; }
+.coords-leitura { font-size: 0.9rem; color: var(--cor-texto-suave, #555); margin: 0.5rem 0 0; }
+
+/* Formulário de alerta de infraestrutura */
+.infra-form__preview { max-width: 220px; border-radius: 8px; margin-top: 0.5rem; display: block; }
+.infra-form__coords { display: flex; gap: 1rem; margin-top: 0.5rem; flex-wrap: wrap; }
+/* flex:1 1 140px + min-width:0 deixa os campos numéricos encolherem em telas
+   estreitas (senão a largura intrínseca do input[type=number] estoura a tela). */
+.infra-form__coords label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; color: var(--cor-texto-suave); flex: 1 1 140px; min-width: 0; }
+.infra-form__coords input { width: 100%; min-width: 0; }
+.campo-checkbox { display: flex; align-items: center; gap: 0.5rem; margin: 0.75rem 0; }
+.campo-checkbox input { width: auto; }
+
+/* Lista de alertas de infraestrutura (cartões) */
+.infra-lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.infra-card { overflow: hidden; padding: 0; display: flex; flex-direction: column; }
+.infra-card__foto { width: 100%; height: 160px; object-fit: cover; }
+.infra-card__corpo { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.infra-card__topo { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: space-between; }
+.infra-card__descricao { margin: 0; }
+.infra-card__meta { margin: 0; color: var(--cor-texto-suave); font-size: 0.82rem; }
+.infra-card__status-editor { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--cor-texto-suave); margin-top: 0.25rem; }
+.infra-card__status-editor select { width: auto; }
+
+/* Badges de categoria de infraestrutura */
+.badge--cat-iluminacao { background: #fdf6e0; color: #8a6d00; border-color: #f0e29b; }
+.badge--cat-buraco     { background: #f3ece2; color: #6b4a1f; border-color: #ddc7a8; }
+.badge--cat-lixo       { background: #e6f4ea; color: #1b5e2f; border-color: #b7dfc4; }
+.badge--cat-saneamento { background: #e7f0fd; color: #17458c; border-color: #b9d2f4; }
+.badge--cat-outro      { background: #eef2f8; color: #263a5c; border-color: #c6d2e6; }
+
+/* Eixos do aluno (Saúde/Assistência/Vida Escolar) */
+.eixos-abas { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; border-bottom: 1px solid var(--cor-borda); }
+.eixo-aba {
+  background: none; border: none; border-bottom: 3px solid transparent;
+  padding: 0.6rem 0.9rem; cursor: pointer; font: inherit; color: var(--cor-texto-suave);
+}
+.eixo-aba--ativa { color: var(--cor-primaria); border-bottom-color: var(--cor-primaria); font-weight: 600; }
+/* minmax(0,1fr): igual ao .portal-cidadao — deixa a coluna encolher abaixo do
+   min-content dos filhos (senão o input[type=file] do Logbook/Documentos e os
+   campos numéricos estouram a trilha e vazam no celular). */
+.eixo-secao { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.eixo-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.aviso-risco { background: #fbecec; color: var(--cor-perigo); padding: 0.6rem 0.9rem; border-radius: 8px; border: 1px solid #e5b4b1; }
+.logbook-galeria { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.logbook-foto { position: relative; border: 1px solid var(--cor-borda); border-radius: 8px; overflow: hidden; }
+.logbook-foto img { width: 100%; height: 120px; object-fit: cover; display: block; }
+.logbook-foto figcaption { font-size: 0.78rem; padding: 0.35rem 0.5rem; color: var(--cor-texto-suave); }
+.logbook-foto__remover { position: absolute; top: 4px; right: 4px; background: rgba(255,255,255,0.9); border: 1px solid var(--cor-borda); border-radius: 4px; cursor: pointer; padding: 0 0.4rem; }
+.sintoma-item { border-bottom: 1px solid var(--cor-borda); padding: 0.4rem 0; font-size: 0.88rem; }
+
+/* Documentos do aluno */
+.doc-cabecalho { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.doc-filtro { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: var(--cor-texto-suave); }
+.doc-filtro select { width: auto; }
+.doc-lista { list-style: none; padding: 0; margin: 0.5rem 0 0; display: grid; gap: 0.5rem; }
+.doc-item { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.5rem 0; border-bottom: 1px solid var(--cor-borda); }
+.doc-nome { font-weight: 600; color: var(--cor-primaria); text-decoration: none; }
+.doc-nome:hover { text-decoration: underline; }
+.doc-meta { color: var(--cor-texto-suave); font-size: 0.8rem; margin-left: auto; }
+.badge--doc-saude   { background: #fbecec; color: #8a1a15; border-color: #e5b4b1; }
+.badge--doc-social  { background: #e7f0fd; color: #17458c; border-color: #b9d2f4; }
+.badge--doc-escolar { background: #e6f4ea; color: #1b5e2f; border-color: #b7dfc4; }
+.badge--doc-outro   { background: #eef2f8; color: #263a5c; border-color: #c6d2e6; }
+
+/* Denúncia rápida (1 clique + GPS) */
+.relato-rapido { border-left: 6px solid var(--cor-primaria); }
+.relato-rapido__botoes { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.btn-gps { display: inline-flex; align-items: center; gap: 0.4rem; }
+.gps-status { font-size: 0.82rem; color: var(--cor-texto-suave); margin: 0.4rem 0 0; }
+.heatmap { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+.heatmap th, .heatmap td { border: 1px solid var(--cor-borda); padding: 0.5rem 0.7rem; text-align: center; }
+.heatmap th[scope='row'] { text-align: left; white-space: nowrap; background: #f0f3f8; }
+.heatmap thead th { background: #f0f3f8; font-size: 0.82rem; }
+.heatmap .heatmap-canto { background: #f0f3f8; }
+.heatmap .celula-forte { color: #fff; font-weight: 700; }
+
+/* ---- Mapa geográfico das escolas ---- */
+.mapa-scroll { overflow-x: auto; margin-bottom: 1rem; }
+.mapa-svg { width: 100%; min-width: 480px; height: auto; display: block; }
+.mapa-rotulo { font-size: 11px; fill: var(--cor-texto); font-weight: 600; }
+.mapa-legenda {
+  list-style: none; margin: 0 0 1rem; padding: 0;
+  display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.85rem;
+}
+.mapa-legenda li { display: flex; align-items: center; gap: 0.4rem; }
+
+/* ---- Impressão (Relatórios → PDF) ---- */
+@media print {
+  .cabecalho-app,
+  .rodape-app,
+  .nao-imprimir,
+  .pular-para-conteudo {
+    display: none !important;
+  }
+  body { background: #fff; }
+  .conteudo { margin: 0; max-width: none; padding: 0; }
+  .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+  .grupos-metricas { grid-template-columns: 1fr 1fr; }
+  .area-relatorio h2::after {
+    content: ' — Itaitinga Conectada';
+    font-weight: 400;
+    color: #555;
+  }
+}
+
+/* Respeita quem prefere menos animação. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

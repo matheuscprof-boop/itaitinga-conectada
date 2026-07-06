@@ -1,0 +1,90 @@
+{
+  "_comentario": "Estrutura de dados de referência do SAAE. Espelha as tabelas do banco (backend/src/schema.sql) e serve como exemplo de payload das rotas.",
+
+  "escola": {
+    "id": 1,
+    "nome": "EMEF Jardim das Flores",
+    "municipio": "Cidade Exemplo",
+    "endereco": "Rua das Acácias, 100",
+    "latitude": -23.55,
+    "longitude": -46.63,
+    "criado_em": "2026-07-02 08:00:00"
+  },
+
+  "usuario": {
+    "id": 2,
+    "nome": "Coord. Marcos Reis",
+    "email": "marcos@saae.local",
+    "perfil": "coordenacao",
+    "escola_id": 1,
+    "criado_em": "2026-07-02 08:30:00",
+    "_nota": "senha_hash/senha_salt existem no banco mas nunca são retornados. A Secretaria tem perfil 'secretaria' e escola_id nulo (todas as escolas)."
+  },
+
+  "login_requisicao": {
+    "email": "admin@saae.local",
+    "senha": "admin123"
+  },
+  "login_resposta": {
+    "token": "<token-assinado>.<assinatura>",
+    "usuario": { "id": 1, "nome": "Administração", "email": "admin@saae.local", "perfil": "direcao" }
+  },
+
+  "aluno": {
+    "id": 1,
+    "escola_id": 1,
+    "nome": "Ana Beatriz Souza",
+    "matricula": "2025001",
+    "turma": "9º A",
+    "data_nascimento": "2011-03-14",
+    "responsavel_nome": "Marina Souza",
+    "responsavel_contato": "(11) 98888-1010",
+    "observacoes": "Participa do reforço de matemática às terças.",
+    "criado_em": "2026-07-02 09:00:00",
+    "atualizado_em": "2026-07-02 09:00:00"
+  },
+
+  "alerta": {
+    "id": 10,
+    "aluno_id": 1,
+    "eixo": "frequencia",
+    "nivel": "medio",
+    "titulo": "Faltas recorrentes às segundas",
+    "descricao": "Três faltas nas últimas quatro segundas-feiras.",
+    "status": "aberto",
+    "criado_em": "2026-07-02 09:05:00",
+    "atualizado_em": "2026-07-02 09:05:00"
+  },
+
+  "alerta_historico": [
+    {
+      "id": 100,
+      "alerta_id": 10,
+      "tipo": "mudanca_status",
+      "texto": "Alerta registrado.",
+      "status_anterior": null,
+      "status_novo": "aberto",
+      "autor_id": 2,
+      "autor_nome": "Prof. Helena Dias",
+      "criado_em": "2026-07-02 09:05:00"
+    },
+    {
+      "id": 101,
+      "alerta_id": 10,
+      "tipo": "comentario",
+      "texto": "Conversei com a responsável; combinamos acompanhar por duas semanas.",
+      "status_anterior": null,
+      "status_novo": null,
+      "autor_id": 3,
+      "autor_nome": "Coord. Marcos Reis",
+      "criado_em": "2026-07-03 14:20:00"
+    }
+  ],
+
+  "valores_permitidos": {
+    "eixo": ["frequencia", "desempenho", "socioemocional"],
+    "nivel": ["baixo", "medio", "alto"],
+    "status": ["aberto", "em_andamento", "resolvido"],
+    "perfil": ["professor", "coordenacao", "direcao", "secretaria"]
+  }
+}
