@@ -24,13 +24,22 @@ export function migrar(db) {
   // 2b) Endereço residencial na assistência (origem da geolocalização por GPS).
   garantirColuna(db, 'assistencia_aluno', 'endereco', 'TEXT');
 
-  // 3) O CHECK do perfil precisa aceitar 'secretaria' e 'cidadao'. Se o banco
-  //    antigo tem o CHECK sem algum desses valores, reconstruímos a tabela
-  //    preservando os dados.
+  // 2c) Verificação de e-mail + dados de vínculo (equipe/gestão). O DEFAULT 1
+  //     em email_verificado marca as contas já existentes como verificadas
+  //     (para não trancar quem já usava o sistema); o autocadastro grava 0.
+  garantirColuna(db, 'usuarios', 'email_verificado', 'INTEGER NOT NULL DEFAULT 1');
+  garantirColuna(db, 'usuarios', 'codigo_verificacao', 'TEXT');
+  garantirColuna(db, 'usuarios', 'codigo_expira_em', 'INTEGER');
+  garantirColuna(db, 'usuarios', 'cargo', 'TEXT');
+  garantirColuna(db, 'usuarios', 'matricula_funcional', 'TEXT');
+
+  // 3) O CHECK do perfil precisa aceitar 'secretaria_escolar' e 'cidadao'. Se o
+  //    banco antigo tem o CHECK sem algum desses valores, reconstruímos a tabela
+  //    preservando os dados. (As colunas novas acima já existem neste ponto.)
   const linha = db
     .prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='usuarios'")
     .get();
-  if (linha && (!linha.sql.includes('secretaria') || !linha.sql.includes('cidadao'))) {
+  if (linha && (!linha.sql.includes('secretaria_escolar') || !linha.sql.includes('cidadao'))) {
     reconstruirUsuarios(db);
   }
 
@@ -81,8 +90,9 @@ function reconstruirAlertasInfra(db) {
 }
 
 function reconstruirUsuarios(db) {
-  // Alterar CHECK exige recriar a tabela (limitação do SQLite).
-  const temStatus = colunas(db, 'usuarios').includes('status');
+  // Alterar CHECK exige recriar a tabela (limitação do SQLite). As colunas
+  // novas (email_verificado, cargo, etc.) já foram garantidas antes desta
+  // chamada, então podemos copiá-las diretamente.
   db.pragma('foreign_keys = OFF');
   const tx = db.transaction(() => {
     db.exec(`
@@ -93,18 +103,27 @@ function reconstruirUsuarios(db) {
         senha_hash  TEXT    NOT NULL,
         senha_salt  TEXT    NOT NULL,
         perfil      TEXT    NOT NULL DEFAULT 'professor'
-                    CHECK (perfil IN ('professor','coordenacao','direcao','secretaria','cidadao')),
+                    CHECK (perfil IN ('professor','coordenacao','direcao','secretaria','secretaria_escolar','cidadao')),
         escola_id   INTEGER,
         status      TEXT    NOT NULL DEFAULT 'ativo'
                     CHECK (status IN ('ativo','pendente')),
+        email_verificado    INTEGER NOT NULL DEFAULT 1,
+        codigo_verificacao  TEXT,
+        codigo_expira_em    INTEGER,
+        cargo               TEXT,
+        matricula_funcional TEXT,
         criado_em   TEXT    NOT NULL DEFAULT (datetime('now')),
         FOREIGN KEY (escola_id) REFERENCES escolas(id) ON DELETE SET NULL
       );
     `);
-    const statusExpr = temStatus ? 'status' : "'ativo'";
     db.exec(`
-      INSERT INTO usuarios_novo (id, nome, email, senha_hash, senha_salt, perfil, escola_id, status, criado_em)
-      SELECT id, nome, email, senha_hash, senha_salt, perfil, escola_id, ${statusExpr}, criado_em FROM usuarios;
+      INSERT INTO usuarios_novo
+        (id, nome, email, senha_hash, senha_salt, perfil, escola_id, status,
+         email_verificado, codigo_verificacao, codigo_expira_em, cargo, matricula_funcional, criado_em)
+      SELECT
+         id, nome, email, senha_hash, senha_salt, perfil, escola_id, status,
+         email_verificado, codigo_verificacao, codigo_expira_em, cargo, matricula_funcional, criado_em
+      FROM usuarios;
     `);
     db.exec('DROP TABLE usuarios');
     db.exec('ALTER TABLE usuarios_novo RENAME TO usuarios');

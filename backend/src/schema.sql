@@ -32,12 +32,19 @@ CREATE TABLE IF NOT EXISTS usuarios (
   senha_hash  TEXT    NOT NULL,
   senha_salt  TEXT    NOT NULL,
   perfil      TEXT    NOT NULL DEFAULT 'professor'
-                      CHECK (perfil IN ('professor', 'coordenacao', 'direcao', 'secretaria', 'cidadao')),
+                      CHECK (perfil IN ('professor', 'coordenacao', 'direcao', 'secretaria', 'secretaria_escolar', 'cidadao')),
   escola_id   INTEGER,   -- nulo para secretaria (municipal) e cidadão
   -- 'ativo' | 'pendente'. Contas de equipe autocadastradas nascem 'pendente'
   -- e só acessam dados de aluno após aprovação (salvaguarda LGPD).
   status      TEXT    NOT NULL DEFAULT 'ativo'
                       CHECK (status IN ('ativo', 'pendente')),
+  -- Verificação de e-mail: contas criadas por um admin/seed nascem com 1;
+  -- o autocadastro público nasce com 0 e confirma via código enviado por e-mail.
+  email_verificado    INTEGER NOT NULL DEFAULT 1,
+  codigo_verificacao  TEXT,               -- código de 6 dígitos (enquanto pendente)
+  codigo_expira_em    INTEGER,            -- validade do código (epoch ms)
+  cargo               TEXT,               -- cargo/função (equipe/gestão)
+  matricula_funcional TEXT,               -- matrícula do servidor (equipe/gestão)
   criado_em   TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (escola_id) REFERENCES escolas(id) ON DELETE SET NULL
 );

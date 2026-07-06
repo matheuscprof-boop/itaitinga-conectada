@@ -438,9 +438,21 @@ body {
 .tabela tr:last-child td { border-bottom: none; }
 
 /* Selo de perfil (usado na gestão de usuários) */
-.badge--perfil-professor   { background: #eef2f8; color: #263a5c; border-color: #c6d2e6; }
-.badge--perfil-coordenacao { background: #fdf3e0; color: #8a5a00; border-color: #f0d59b; }
-.badge--perfil-direcao     { background: #e7f0fd; color: #17458c; border-color: #b9d2f4; }
+.badge--perfil-professor          { background: #eef2f8; color: #263a5c; border-color: #c6d2e6; }
+.badge--perfil-coordenacao        { background: #fdf3e0; color: #8a5a00; border-color: #f0d59b; }
+.badge--perfil-direcao            { background: #e7f0fd; color: #17458c; border-color: #b9d2f4; }
+.badge--perfil-secretaria         { background: #ede7fb; color: #4b2c9c; border-color: #cfc0f2; }
+.badge--perfil-secretaria_escolar { background: #e0f4f2; color: #0b5b53; border-color: #a9dcd6; }
+.badge--perfil-cidadao            { background: #eef2f8; color: #263a5c; border-color: #c6d2e6; }
+
+/* Seção "Pendentes de aprovação" na gestão de usuários */
+.secao-pendentes {
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--cor-primaria);
+  padding-left: 1rem;
+}
+.secao-pendentes h3 { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; }
+.secao-pendentes .contador-nav { margin-left: 0; }
 
 /* Mensagem de sucesso */
 .alerta-sucesso {

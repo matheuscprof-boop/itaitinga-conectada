@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { api, getToken, ROTULOS, podeGerenciar, ehCidadao } from './api.js';
 import Login from './pages/Login.jsx';
 import Cadastro from './pages/Cadastro.jsx';
+import VerificarEmail from './pages/VerificarEmail.jsx';
 import PortalCidadao from './pages/PortalCidadao.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import AlunoDetalhe from './pages/AlunoDetalhe.jsx';
@@ -24,7 +25,8 @@ export default function App() {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [naoLidas, setNaoLidas] = useState(0);
-  const [telaPublica, setTelaPublica] = useState('login'); // login | cadastro | portal
+  const [telaPublica, setTelaPublica] = useState('login'); // login | cadastro | portal | verificar
+  const [emailPendente, setEmailPendente] = useState(''); // e-mail em verificação
   // view = { tela: 'dashboard' | 'detalhe' | 'relatorios' | 'infraestrutura' | ... }
   const [view, setView] = useState({ tela: 'dashboard' });
 
@@ -85,7 +87,21 @@ export default function App() {
   // --- Não autenticado: login / cadastro / portal público ---
   if (!usuario) {
     if (telaPublica === 'cadastro') {
-      return <Cadastro onVoltar={() => setTelaPublica('login')} />;
+      return (
+        <Cadastro
+          onVoltar={() => setTelaPublica('login')}
+          onRegistrado={(email) => { setEmailPendente(email); setTelaPublica('verificar'); }}
+        />
+      );
+    }
+    if (telaPublica === 'verificar') {
+      return (
+        <VerificarEmail
+          email={emailPendente}
+          onVerificado={() => setTelaPublica('login')}
+          onVoltar={() => setTelaPublica('login')}
+        />
+      );
     }
     if (telaPublica === 'portal') {
       return (
@@ -103,6 +119,7 @@ export default function App() {
         onLogin={aoLogar}
         onCadastrar={() => setTelaPublica('cadastro')}
         onPortal={() => setTelaPublica('portal')}
+        onPrecisaVerificar={(email) => { setEmailPendente(email); setTelaPublica('verificar'); }}
       />
     );
   }

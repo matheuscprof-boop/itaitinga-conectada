@@ -76,6 +76,26 @@ export async function enviarEmail({ para, assunto, texto, html }) {
   });
 }
 
+// Envia o código de verificação de e-mail para uma nova conta.
+// Retorna o `info` do envio, ou null se não houver SMTP configurado (nesse
+// caso o chamador registra o código no log para permitir o teste offline).
+export async function enviarCodigoVerificacao(para, codigo) {
+  const assunto = 'Seu código de verificação — Itaitinga Conectada';
+  const texto =
+    `Bem-vindo(a) ao Itaitinga Conectada!\n\n` +
+    `Seu código de verificação é: ${codigo}\n\n` +
+    `Digite-o na tela de confirmação para ativar sua conta. ` +
+    `O código expira em 30 minutos.\n\n` +
+    `Se não foi você quem se cadastrou, ignore este e-mail.`;
+  const html =
+    `<p>Bem-vindo(a) ao <strong>Itaitinga Conectada</strong>!</p>` +
+    `<p>Seu código de verificação é:</p>` +
+    `<p style="font-size:1.6rem;font-weight:700;letter-spacing:3px">${codigo}</p>` +
+    `<p>Digite-o na tela de confirmação para ativar sua conta. O código expira em 30 minutos.</p>` +
+    `<p style="color:#666;font-size:.85rem">Se não foi você quem se cadastrou, ignore este e-mail.</p>`;
+  return enviarEmail({ para, assunto, texto, html });
+}
+
 // --- Suporte a testes: injeta/reseta um transporte falso (com `sendMail`). ---
 export function configurarTransporteParaTeste(transporte) {
   transporteTeste = transporte;

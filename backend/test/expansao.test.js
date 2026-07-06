@@ -166,13 +166,35 @@ test('Eixo C: remoção de foto do diário', async () => {
   assert.equal(del.status, 204);
 });
 
-test('Autocadastro: cidadão nasce ativo e consegue entrar', async () => {
+// Lê o código de verificação diretamente do banco (compartilhado com o server).
+function codigoDe(email) {
+  return db.prepare('SELECT codigo_verificacao FROM usuarios WHERE email = ?').get(email)?.codigo_verificacao;
+}
+
+test('Autocadastro: cidadão verifica o e-mail e então consegue entrar', async () => {
   const reg = await api('/api/auth/registro', {
     method: 'POST',
     body: { nome: 'Zé', email: 'ze@itaitinga.gov', senha: 'senha123', perfil: 'cidadao' },
   });
   assert.equal(reg.status, 201);
-  assert.equal(reg.dados.pendente, false);
+  assert.equal(reg.dados.precisa_verificar, true);
+  assert.equal(reg.dados.pendente_aprovacao, false);
+
+  // Antes de verificar o e-mail, o login é bloqueado.
+  const bloq = await api('/api/auth/login', {
+    method: 'POST',
+    body: { email: 'ze@itaitinga.gov', senha: 'senha123' },
+  });
+  assert.equal(bloq.status, 403);
+  assert.equal(bloq.dados.motivo, 'email_nao_verificado');
+
+  // Confirma o e-mail com o código.
+  const ver = await api('/api/auth/verificar-email', {
+    method: 'POST',
+    body: { email: 'ze@itaitinga.gov', codigo: codigoDe('ze@itaitinga.gov') },
+  });
+  assert.equal(ver.status, 200);
+  assert.equal(ver.dados.pendente_aprovacao, false);
 
   const login = await api('/api/auth/login', {
     method: 'POST',
@@ -235,14 +257,36 @@ test('RBAC: cidadão é bloqueado nas áreas de dados de aluno', async () => {
   assert.equal(saude.status, 403);
 });
 
-test('Autocadastro de equipe nasce ativo e entra imediatamente', async () => {
+test('Autocadastro de equipe: verifica e-mail, fica pendente e entra após aprovação', async () => {
   const reg = await api('/api/auth/registro', {
     method: 'POST',
     body: { nome: 'Prof Novo', email: 'prof@e.com', senha: 'senha123', perfil: 'professor', escola_id: estado.escolaId },
   });
   assert.equal(reg.status, 201);
-  assert.equal(reg.dados.pendente, false);
-  assert.equal(reg.dados.usuario.status, 'ativo');
+  assert.equal(reg.dados.pendente_aprovacao, true);
+
+  // Verifica o e-mail — mas ainda fica pendente de aprovação.
+  const ver = await api('/api/auth/verificar-email', {
+    method: 'POST',
+    body: { email: 'prof@e.com', codigo: codigoDe('prof@e.com') },
+  });
+  assert.equal(ver.status, 200);
+  assert.equal(ver.dados.pendente_aprovacao, true);
+
+  const bloq = await api('/api/auth/login', {
+    method: 'POST',
+    body: { email: 'prof@e.com', senha: 'senha123' },
+  });
+  assert.equal(bloq.status, 403);
+  assert.equal(bloq.dados.motivo, 'pendente');
+
+  // A secretaria (admin) vê o pendente e aprova.
+  const pend = await api('/api/auth/usuarios/pendentes', { token: estado.adminToken });
+  assert.equal(pend.status, 200);
+  const alvo = pend.dados.find((u) => u.email === 'prof@e.com');
+  assert.ok(alvo, 'a conta pendente deve aparecer na lista');
+  const apr = await api(`/api/auth/usuarios/${alvo.id}/aprovar`, { token: estado.adminToken, method: 'PATCH' });
+  assert.equal(apr.status, 200);
 
   const login = await api('/api/auth/login', {
     method: 'POST',
@@ -260,12 +304,28 @@ test('Autocadastro de equipe exige escola válida', async () => {
   assert.equal(semEscola.status, 400);
 });
 
-test('Autocadastro de secretaria é negado', async () => {
+test('Autocadastro de secretaria escolar exige escola e nasce pendente', async () => {
+  const semEscola = await api('/api/auth/registro', {
+    method: 'POST',
+    body: { nome: 'Sec Esc', email: 'secesc@e.com', senha: 'senha123', perfil: 'secretaria_escolar' },
+  });
+  assert.equal(semEscola.status, 400);
+
   const reg = await api('/api/auth/registro', {
     method: 'POST',
-    body: { nome: 'X', email: 'x@e.com', senha: 'senha123', perfil: 'secretaria' },
+    body: { nome: 'Sec Esc', email: 'secesc@e.com', senha: 'senha123', perfil: 'secretaria_escolar', escola_id: estado.escolaId, cargo: 'Secretária', matricula_funcional: '12345' },
   });
-  assert.equal(reg.status, 400);
+  assert.equal(reg.status, 201);
+  assert.equal(reg.dados.pendente_aprovacao, true);
+});
+
+test('Autocadastro de secretaria municipal é permitido e nasce pendente', async () => {
+  const reg = await api('/api/auth/registro', {
+    method: 'POST',
+    body: { nome: 'Sec Nova', email: 'secnova@e.com', senha: 'senha123', perfil: 'secretaria' },
+  });
+  assert.equal(reg.status, 201);
+  assert.equal(reg.dados.pendente_aprovacao, true);
 });
 
 test('Documentos: upload (gestão), listagem e remoção', async () => {

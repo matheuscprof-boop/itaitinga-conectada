@@ -4,7 +4,7 @@
 export const EIXOS = ['frequencia', 'desempenho', 'socioemocional'];
 export const NIVEIS = ['baixo', 'medio', 'alto'];
 export const STATUS = ['aberto', 'em_andamento', 'resolvido'];
-export const PERFIS = ['professor', 'coordenacao', 'direcao', 'secretaria', 'cidadao'];
+export const PERFIS = ['professor', 'coordenacao', 'direcao', 'secretaria', 'secretaria_escolar', 'cidadao'];
 
 // Rótulos legíveis (usados também como referência pelo frontend).
 export const EIXOS_LABEL = {
@@ -18,20 +18,24 @@ export const PERFIS_LABEL = {
   coordenacao: 'Coordenação',
   direcao: 'Direção',
   secretaria: 'Secretaria Municipal',
+  secretaria_escolar: 'Secretaria Escolar',
   cidadao: 'Cidadão Itaitinguense',
 };
 
 // Perfis que gerenciam alunos e removem alertas (dentro do seu escopo).
-export const PERFIS_GESTAO = ['coordenacao', 'direcao', 'secretaria'];
+// 'secretaria_escolar' mexe com dados de aluno no escopo da própria escola.
+export const PERFIS_GESTAO = ['coordenacao', 'direcao', 'secretaria', 'secretaria_escolar'];
 
-// Perfis que administram usuários.
+// Perfis que administram usuários (criam/aprovam contas).
 export const PERFIS_ADMIN_USUARIOS = ['direcao', 'secretaria'];
 
 // Perfil com visão municipal (todas as escolas).
 export const PERFIL_MUNICIPAL = 'secretaria';
 
 // Perfis de equipe (com acesso a dados de aluno). Cidadão fica de fora.
-export const PERFIS_EQUIPE = ['professor', 'coordenacao', 'direcao', 'secretaria'];
+// São também os perfis "privilegiados": nascem pendentes de aprovação no
+// autocadastro (não basta verificar o e-mail — precisam ser aprovados).
+export const PERFIS_EQUIPE = ['professor', 'coordenacao', 'direcao', 'secretaria', 'secretaria_escolar'];
 
 // Perfil de cidadão (eixo D — infraestrutura/cidadania; sem acesso a alunos).
 export const PERFIL_CIDADAO = 'cidadao';

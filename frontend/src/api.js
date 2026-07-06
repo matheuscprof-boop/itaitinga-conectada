@@ -38,7 +38,13 @@ async function tratarResposta(resp) {
   if (resp.status === 204) return null; // sem conteúdo (ex.: DELETE)
 
   const dados = await resp.json().catch(() => ({}));
-  if (!resp.ok) throw new Error(dados.erro || 'Ocorreu um erro na requisição.');
+  if (!resp.ok) {
+    const erro = new Error(dados.erro || 'Ocorreu um erro na requisição.');
+    erro.motivo = dados.motivo; // ex.: 'email_nao_verificado' | 'pendente'
+    erro.email = dados.email;
+    erro.status = resp.status;
+    throw erro;
+  }
   return dados;
 }
 
@@ -72,9 +78,14 @@ export const api = {
   eu: () => requisicao('/auth/me'),
   logout: () => limparToken(),
 
-  // Autocadastro público (cidadão entra imediato; equipe fica pendente)
+  // Autocadastro público. Todos verificam o e-mail; perfis privilegiados
+  // ainda ficam pendentes de aprovação.
   registrar: (dados) =>
     requisicao('/auth/registro', { method: 'POST', body: JSON.stringify(dados) }),
+  verificarEmail: (email, codigo) =>
+    requisicao('/auth/verificar-email', { method: 'POST', body: JSON.stringify({ email, codigo }) }),
+  reenviarCodigo: (email) =>
+    requisicao('/auth/reenviar-codigo', { method: 'POST', body: JSON.stringify({ email }) }),
   // Lista pública mínima de escolas (para o formulário de cadastro)
   listarEscolasPublicas: () => requisicao('/escolas-publicas'),
 
@@ -84,6 +95,9 @@ export const api = {
 
   // Gestão de usuários (somente direção)
   listarUsuarios: () => requisicao('/auth/usuarios'),
+  // Contas aguardando aprovação + aprovação (direção/secretaria).
+  listarPendentes: () => requisicao('/auth/usuarios/pendentes'),
+  aprovarUsuario: (id) => requisicao(`/auth/usuarios/${id}/aprovar`, { method: 'PATCH' }),
   criarUsuario: (dados) =>
     requisicao('/auth/usuarios', { method: 'POST', body: JSON.stringify(dados) }),
   atualizarUsuario: (id, dados) =>
@@ -229,6 +243,7 @@ export const ROTULOS = {
     coordenacao: 'Coordenação',
     direcao: 'Direção',
     secretaria: 'Secretaria Municipal',
+    secretaria_escolar: 'Secretaria Escolar',
     cidadao: 'Cidadão Itaitinguense',
   },
   categoriaInfra: {
@@ -261,7 +276,12 @@ export function rotuloInfra(categoria) {
 
 // Perfis que podem gerenciar alunos e remover alertas.
 export function podeGerenciar(perfil) {
-  return perfil === 'coordenacao' || perfil === 'direcao' || perfil === 'secretaria';
+  return (
+    perfil === 'coordenacao' ||
+    perfil === 'direcao' ||
+    perfil === 'secretaria' ||
+    perfil === 'secretaria_escolar'
+  );
 }
 
 // Perfil com visão municipal (todas as escolas).

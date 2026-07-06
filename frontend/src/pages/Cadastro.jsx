@@ -1,24 +1,28 @@
-// Autocadastro público. Cidadão entra imediatamente; equipe (professor/
-// coordenação/direção) precisa selecionar uma escola e fica pendente de
-// aprovação de um administrador.
+// Autocadastro público. Todos confirmam o e-mail por código; os perfis
+// privilegiados (equipe/gestão/secretaria) ainda ficam pendentes de aprovação.
 import { useEffect, useState } from 'react';
 import { api, ROTULOS } from '../api.js';
 
-// Perfis oferecidos no autocadastro (Secretaria não se autocadastra).
-const PERFIS = ['cidadao', 'professor', 'coordenacao', 'direcao'];
+// Perfis oferecidos no autocadastro (na ordem exibida).
+const PERFIS = ['cidadao', 'professor', 'coordenacao', 'secretaria_escolar', 'direcao', 'secretaria'];
 
-export default function Cadastro({ onVoltar }) {
+export default function Cadastro({ onVoltar, onRegistrado }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [perfil, setPerfil] = useState('cidadao');
+  const [cargo, setCargo] = useState('');
+  const [matricula, setMatricula] = useState('');
   const [escolaId, setEscolaId] = useState('');
   const [escolas, setEscolas] = useState([]);
   const [erro, setErro] = useState('');
-  const [sucesso, setSucesso] = useState('');
   const [enviando, setEnviando] = useState(false);
 
   const ehCidadao = perfil === 'cidadao';
+  const ehMunicipal = perfil === 'secretaria';
+  // Perfis de escola precisam vincular uma escola (cidadão e secretaria
+  // municipal não têm escola).
+  const precisaEscola = !ehCidadao && !ehMunicipal;
 
   useEffect(() => {
     api.listarEscolasPublicas().then(setEscolas).catch(() => {});
@@ -27,39 +31,31 @@ export default function Cadastro({ onVoltar }) {
   async function enviar(e) {
     e.preventDefault();
     setErro('');
-    setSucesso('');
     if (senha.length < 6) {
       setErro('A senha deve ter ao menos 6 caracteres.');
       return;
     }
-    if (!ehCidadao && !escolaId) {
+    if (precisaEscola && !escolaId) {
       setErro('Selecione a escola em que você atua.');
       return;
     }
     setEnviando(true);
     try {
-      const resp = await api.registrar({
-        nome, email, senha, perfil,
-        escola_id: ehCidadao ? null : Number(escolaId),
+      await api.registrar({
+        nome,
+        email,
+        senha,
+        perfil,
+        escola_id: precisaEscola ? Number(escolaId) : null,
+        cargo: ehCidadao ? null : cargo,
+        matricula_funcional: ehCidadao ? null : matricula,
       });
-      setSucesso(resp.mensagem);
+      onRegistrado(email.trim().toLowerCase());
     } catch (err) {
       setErro(err.message);
     } finally {
       setEnviando(false);
     }
-  }
-
-  if (sucesso) {
-    return (
-      <div className="tela-login">
-        <div className="card form form-login">
-          <h1>Conta criada</h1>
-          <p className="alerta-sucesso" role="status">{sucesso}</p>
-          <button className="btn btn--primario" onClick={onVoltar}>Ir para o login</button>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -77,6 +73,12 @@ export default function Cadastro({ onVoltar }) {
               <option key={p} value={p}>{ROTULOS.perfil[p]}</option>
             ))}
           </select>
+          {!ehCidadao && (
+            <p className="dica-campo">
+              Perfis de escola/gestão passam por <strong>aprovação de um responsável</strong> antes
+              de liberar o acesso aos dados dos alunos.
+            </p>
+          )}
         </div>
 
         <div className="campo">
@@ -86,15 +88,32 @@ export default function Cadastro({ onVoltar }) {
 
         <div className="campo">
           <label htmlFor="email">E-mail</label>
-          <input id="email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input id="email" type="email" autoComplete="username" required value={email}
+            onChange={(e) => setEmail(e.target.value)} />
         </div>
 
         <div className="campo">
           <label htmlFor="senha">Senha</label>
-          <input id="senha" type="password" autoComplete="new-password" required value={senha} onChange={(e) => setSenha(e.target.value)} />
+          <input id="senha" type="password" autoComplete="new-password" required value={senha}
+            onChange={(e) => setSenha(e.target.value)} />
         </div>
 
         {!ehCidadao && (
+          <>
+            <div className="campo">
+              <label htmlFor="cargo">Cargo / função</label>
+              <input id="cargo" value={cargo} onChange={(e) => setCargo(e.target.value)}
+                placeholder="Ex.: Secretária escolar, Diretor(a)" />
+            </div>
+            <div className="campo">
+              <label htmlFor="matricula">Matrícula funcional</label>
+              <input id="matricula" value={matricula} onChange={(e) => setMatricula(e.target.value)}
+                placeholder="Nº de matrícula do servidor" />
+            </div>
+          </>
+        )}
+
+        {precisaEscola && (
           <div className="campo">
             <label htmlFor="escola">Escola</label>
             <select id="escola" value={escolaId} onChange={(e) => setEscolaId(e.target.value)}>

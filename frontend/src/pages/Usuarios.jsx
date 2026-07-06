@@ -4,10 +4,14 @@ import { useEffect, useState } from 'react';
 import { api, ROTULOS, ehSecretaria } from '../api.js';
 import Badge from '../components/Badge.jsx';
 
-const FORM_VAZIO = { nome: '', email: '', senha: '', perfil: 'professor', escola_id: '', turmas: [] };
+const FORM_VAZIO = {
+  nome: '', email: '', senha: '', perfil: 'professor', escola_id: '',
+  turmas: [], cargo: '', matricula_funcional: '',
+};
 
 export default function Usuarios({ usuarioAtualId, perfil }) {
   const [usuarios, setUsuarios] = useState([]);
+  const [pendentes, setPendentes] = useState([]);
   const [escolas, setEscolas] = useState([]);
   const [turmasDisponiveis, setTurmasDisponiveis] = useState([]);
   const [novaTurma, setNovaTurma] = useState('');
@@ -21,8 +25,8 @@ export default function Usuarios({ usuarioAtualId, perfil }) {
   const secretaria = ehSecretaria(perfil);
   // A secretaria também pode criar contas municipais (secretaria).
   const PERFIS = secretaria
-    ? ['professor', 'coordenacao', 'direcao', 'secretaria']
-    : ['professor', 'coordenacao', 'direcao'];
+    ? ['professor', 'coordenacao', 'secretaria_escolar', 'direcao', 'secretaria']
+    : ['professor', 'coordenacao', 'secretaria_escolar', 'direcao'];
   // Escola é exigida para perfis que não são municipais.
   const precisaEscola = secretaria && form.perfil !== 'secretaria';
 
@@ -34,11 +38,44 @@ export default function Usuarios({ usuarioAtualId, perfil }) {
     }
   }
 
+  async function carregarPendentes() {
+    try {
+      setPendentes(await api.listarPendentes());
+    } catch { /* ignora: seção some se não houver */ }
+  }
+
   useEffect(() => {
     carregar();
+    carregarPendentes();
     api.listarTurmas().then(setTurmasDisponiveis).catch(() => {});
     if (secretaria) api.listarEscolas().then(setEscolas).catch(() => {});
   }, [secretaria]);
+
+  async function aprovar(u) {
+    setErro('');
+    setAviso('');
+    try {
+      await api.aprovarUsuario(u.id);
+      setAviso(`Conta de "${u.nome}" aprovada — o acesso foi liberado.`);
+      carregar();
+      carregarPendentes();
+    } catch (e) {
+      setErro(e.message);
+    }
+  }
+
+  async function recusar(u) {
+    if (!confirm(`Recusar e remover o cadastro de "${u.nome}"?`)) return;
+    setErro('');
+    setAviso('');
+    try {
+      await api.removerUsuario(u.id);
+      carregar();
+      carregarPendentes();
+    } catch (e) {
+      setErro(e.message);
+    }
+  }
 
   function alterar(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }));
@@ -66,7 +103,11 @@ export default function Usuarios({ usuarioAtualId, perfil }) {
 
   async function iniciarEdicao(u) {
     setEditandoId(u.id);
-    setForm({ nome: u.nome, email: u.email, senha: '', perfil: u.perfil, escola_id: u.escola_id ?? '', turmas: [] });
+    setForm({
+      nome: u.nome, email: u.email, senha: '', perfil: u.perfil,
+      escola_id: u.escola_id ?? '', turmas: [],
+      cargo: u.cargo ?? '', matricula_funcional: u.matricula_funcional ?? '',
+    });
     setErro('');
     setAviso('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -93,7 +134,10 @@ export default function Usuarios({ usuarioAtualId, perfil }) {
     try {
       if (editando) {
         // A senha só é enviada quando preenchida (senão mantém a atual).
-        const dados = { nome: form.nome, email: form.email, perfil: form.perfil };
+        const dados = {
+          nome: form.nome, email: form.email, perfil: form.perfil,
+          cargo: form.cargo, matricula_funcional: form.matricula_funcional,
+        };
         if (secretaria) dados.escola_id = precisaEscola ? form.escola_id : null;
         if (form.senha) dados.nova_senha = form.senha;
         await api.atualizarUsuario(editandoId, dados);
@@ -102,7 +146,10 @@ export default function Usuarios({ usuarioAtualId, perfil }) {
         }
         setAviso(`Usuário "${form.nome}" atualizado.`);
       } else {
-        const dados = { nome: form.nome, email: form.email, senha: form.senha, perfil: form.perfil };
+        const dados = {
+          nome: form.nome, email: form.email, senha: form.senha, perfil: form.perfil,
+          cargo: form.cargo, matricula_funcional: form.matricula_funcional,
+        };
         if (secretaria) dados.escola_id = precisaEscola ? form.escola_id : null;
         const criado = await api.criarUsuario(dados);
         if (form.perfil === 'professor' && form.turmas.length && criado?.id) {
@@ -182,6 +229,19 @@ export default function Usuarios({ usuarioAtualId, perfil }) {
               </select>
             </div>
           )}
+
+          <div className="campo">
+            <label htmlFor="u-cargo">Cargo / função</label>
+            <input id="u-cargo" type="text" value={form.cargo}
+              onChange={(e) => alterar('cargo', e.target.value)}
+              placeholder="Ex.: Secretária escolar" />
+          </div>
+          <div className="campo">
+            <label htmlFor="u-matricula">Matrícula funcional</label>
+            <input id="u-matricula" type="text" value={form.matricula_funcional}
+              onChange={(e) => alterar('matricula_funcional', e.target.value)}
+              placeholder="Nº do servidor" />
+          </div>
         </div>
 
         {form.perfil === 'professor' && (
@@ -234,6 +294,43 @@ export default function Usuarios({ usuarioAtualId, perfil }) {
         </div>
       </form>
 
+      {pendentes.length > 0 && (
+        <section aria-labelledby="titulo-pendentes" className="secao-pendentes">
+          <h3 id="titulo-pendentes">
+            Pendentes de aprovação
+            <span className="contador-nav" aria-label={`${pendentes.length} pendentes`}>{pendentes.length}</span>
+          </h3>
+          <p className="ajuda">
+            Contas que confirmaram o e-mail e aguardam liberação. Aprove apenas quem você
+            reconhece como parte da rede.
+          </p>
+          <ul className="lista" role="list">
+            {pendentes.map((u) => (
+              <li key={u.id} className="lista-item-info">
+                <div>
+                  <strong>{u.nome}</strong>
+                  <span className="lista-item-sub">
+                    {u.email}
+                    {u.escola_nome ? ` · ${u.escola_nome}` : u.perfil === 'secretaria' ? ' · Municipal' : ''}
+                    {u.cargo ? ` · ${u.cargo}` : ''}
+                    {u.matricula_funcional ? ` · matrícula ${u.matricula_funcional}` : ''}
+                  </span>
+                </div>
+                <div className="usuario-acoes">
+                  <Badge tipo="perfil" valor={u.perfil} />
+                  <button className="btn btn--pequeno btn--primario" onClick={() => aprovar(u)}>
+                    Aprovar
+                  </button>
+                  <button className="btn btn--pequeno btn--perigo" onClick={() => recusar(u)}>
+                    Recusar
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section aria-labelledby="titulo-lista-usuarios">
         <h3 id="titulo-lista-usuarios">Usuários cadastrados</h3>
         {usuarios.length === 0 ? (
@@ -247,6 +344,8 @@ export default function Usuarios({ usuarioAtualId, perfil }) {
                   <span className="lista-item-sub">
                     {u.email}
                     {u.escola_nome ? ` · ${u.escola_nome}` : u.perfil === 'secretaria' ? ' · Municipal' : ''}
+                    {u.cargo ? ` · ${u.cargo}` : ''}
+                    {u.status === 'pendente' ? ' · aguardando aprovação' : ''}
                   </span>
                 </div>
                 <div className="usuario-acoes">

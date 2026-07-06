@@ -2,21 +2,27 @@
 import { useState } from 'react';
 import { api } from '../api.js';
 
-export default function Login({ onLogin, onCadastrar, onPortal }) {
+export default function Login({ onLogin, onCadastrar, onPortal, onPrecisaVerificar }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
+  const [naoVerificado, setNaoVerificado] = useState(null); // e-mail a confirmar
   const [entrando, setEntrando] = useState(false);
 
   async function enviar(e) {
     e.preventDefault();
     setErro('');
+    setNaoVerificado(null);
     setEntrando(true);
     try {
       const usuario = await api.login(email, senha);
       onLogin(usuario);
     } catch (err) {
       setErro(err.message);
+      // E-mail ainda não confirmado: oferece ir para a tela de código.
+      if (err.motivo === 'email_nao_verificado') {
+        setNaoVerificado(err.email || email);
+      }
     } finally {
       setEntrando(false);
     }
@@ -32,6 +38,16 @@ export default function Login({ onLogin, onCadastrar, onPortal }) {
           <p className="alerta-erro" role="alert">
             {erro}
           </p>
+        )}
+
+        {naoVerificado && onPrecisaVerificar && (
+          <button
+            type="button"
+            className="btn"
+            onClick={() => onPrecisaVerificar(naoVerificado)}
+          >
+            Confirmar e-mail agora
+          </button>
         )}
 
         <div className="campo">
