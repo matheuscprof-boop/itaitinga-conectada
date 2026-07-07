@@ -207,6 +207,9 @@ CREATE TABLE IF NOT EXISTS vida_escolar_aluno (
   desempenho_media     REAL,                  -- média geral (ex.: 0–10)
   projetos             TEXT,                  -- ex.: "Guardiões dos Biomas"
   observacoes          TEXT,
+  pcd                  INTEGER NOT NULL DEFAULT 0,  -- 0/1: aluno com deficiência
+  pcd_condicao         TEXT,                  -- qual a condição/deficiência
+  pei                  TEXT,                  -- caminho do anexo (PEI: Plano Educacional Individualizado)
   atualizado_em        TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
 );

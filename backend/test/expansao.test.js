@@ -233,6 +233,46 @@ test('Eixo C: remoção de foto do diário', async () => {
   assert.equal(del.status, 204);
 });
 
+test('Eixo C: PcD, condição e upload/remoção do PEI', async () => {
+  const put = await api(`/api/vida-escolar/${estado.alunos[1]}`, {
+    token: estado.adminToken,
+    method: 'PUT',
+    body: { pcd: 1, pcd_condicao: 'Deficiência auditiva' },
+  });
+  assert.equal(put.status, 200);
+  assert.equal(put.dados.pcd, 1);
+  assert.equal(put.dados.pcd_condicao, 'Deficiência auditiva');
+
+  // Anexa o PEI (PDF) — upsert separado não apaga o pcd_condicao.
+  const fd = new FormData();
+  fd.append('arquivo', new Blob([Buffer.from('%PDF-1.4 PEI')], { type: 'application/pdf' }), 'pei.pdf');
+  const up = await fetch(`${base}/api/vida-escolar/${estado.alunos[1]}/pei`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${estado.adminToken}` },
+    body: fd,
+  });
+  assert.equal(up.status, 201);
+  const vida = await up.json();
+  assert.match(vida.pei, /^\/uploads\//);
+  assert.equal(vida.pcd_condicao, 'Deficiência auditiva');
+
+  const del = await api(`/api/vida-escolar/${estado.alunos[1]}/pei`, {
+    token: estado.adminToken, method: 'DELETE',
+  });
+  assert.equal(del.status, 200);
+  assert.equal(del.dados.pei, null);
+});
+
+test('Eixo C: desmarcar PcD limpa a condição', async () => {
+  const put = await api(`/api/vida-escolar/${estado.alunos[1]}`, {
+    token: estado.adminToken,
+    method: 'PUT',
+    body: { pcd: 0, pcd_condicao: 'ignorar' },
+  });
+  assert.equal(put.dados.pcd, 0);
+  assert.equal(put.dados.pcd_condicao, null);
+});
+
 // Lê o código de verificação diretamente do banco (compartilhado com o server).
 function codigoDe(email) {
   return db.prepare('SELECT codigo_verificacao FROM usuarios WHERE email = ?').get(email)?.codigo_verificacao;

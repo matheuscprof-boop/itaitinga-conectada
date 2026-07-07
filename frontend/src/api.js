@@ -179,6 +179,11 @@ export const api = {
     requisicaoForm(`/vida-escolar/${alunoId}/fotos`, formData, 'POST'),
   removerFotoLogbook: (fotoId) =>
     requisicao(`/vida-escolar/fotos/${fotoId}`, { method: 'DELETE' }),
+  // Anexo do PEI (Plano Educacional Individualizado) — multipart, campo "arquivo".
+  enviarPei: (alunoId, formData) =>
+    requisicaoForm(`/vida-escolar/${alunoId}/pei`, formData, 'POST'),
+  removerPei: (alunoId) =>
+    requisicao(`/vida-escolar/${alunoId}/pei`, { method: 'DELETE' }),
 
   // --- Documentos do aluno ---
   listarDocumentos: (alunoId) => requisicao(`/documentos/${alunoId}`),

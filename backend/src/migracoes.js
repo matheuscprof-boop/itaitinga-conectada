@@ -35,6 +35,12 @@ export function migrar(db) {
   garantirColuna(db, 'saude_aluno', 'medicamentos', 'TEXT');
   garantirColuna(db, 'saude_aluno', 'receita', 'TEXT');
 
+  // 2b3) Eixo Vida Escolar: aluno PcD + condição + anexo do PEI (Plano
+  //      Educacional Individualizado).
+  garantirColuna(db, 'vida_escolar_aluno', 'pcd', 'INTEGER NOT NULL DEFAULT 0');
+  garantirColuna(db, 'vida_escolar_aluno', 'pcd_condicao', 'TEXT');
+  garantirColuna(db, 'vida_escolar_aluno', 'pei', 'TEXT');
+
   // 2c) Verificação de e-mail + dados de vínculo (equipe/gestão). O DEFAULT 1
   //     em email_verificado marca as contas já existentes como verificadas
   //     (para não trancar quem já usava o sistema); o autocadastro grava 0.
