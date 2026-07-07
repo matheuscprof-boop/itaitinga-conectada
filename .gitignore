@@ -12,6 +12,10 @@ backend/data/uploads/
 # Ferramentas locais (ex.: cloudflared)
 .tools/
 
+# Segredos de ambiente (SMTP, etc.) — nunca versionar
+.env
+*.env
+
 # Build do frontend
 frontend/dist/
 

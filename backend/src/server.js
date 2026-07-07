@@ -3,6 +3,8 @@
 // os eixos de dados do aluno (Saúde/Assistência/Vida Escolar) e o eixo de
 // Infraestrutura/Cidadania.
 
+import './env.js'; // carrega backend/.env (SMTP etc.) antes de tudo
+
 import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'node:url';

@@ -67,13 +67,17 @@ export async function enviarEmail({ para, assunto, texto, html }) {
   const destinatarios = Array.isArray(para) ? para.filter(Boolean).join(', ') : para;
   if (!destinatarios) return null;
 
-  return transporte.sendMail({
+  const info = await transporte.sendMail({
     from: remetente(),
     to: destinatarios,
     subject: assunto,
     text: texto,
     ...(html ? { html } : {}),
   });
+  // No modo de teste (Ethereal), expõe o link de pré-visualização da mensagem.
+  const preview = nodemailer.getTestMessageUrl?.(info);
+  if (preview) console.log('[SAAE] pré-visualização do e-mail:', preview);
+  return info;
 }
 
 // Envia o código de verificação de e-mail para uma nova conta.
