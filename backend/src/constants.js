@@ -58,6 +58,40 @@ export const STATUS_INFRA = ['aberto', 'em_andamento', 'resolvido'];
 // --- Eixo A — Saúde ---
 export const VACINACAO_STATUS = ['em_dia', 'pendente'];
 
+// Vacinas comuns do calendário do adolescente (checklist da aba Saúde).
+export const VACINAS = [
+  'hpv', 'hepatite_b', 'triplice_viral', 'dt_dtpa', 'febre_amarela', 'meningococica', 'covid19',
+];
+export const VACINAS_LABEL = {
+  hpv: 'HPV',
+  hepatite_b: 'Hepatite B',
+  triplice_viral: 'Tríplice viral (sarampo/caxumba/rubéola)',
+  dt_dtpa: 'dT/dTpa (difteria e tétano)',
+  febre_amarela: 'Febre amarela',
+  meningococica: 'Meningocócica ACWY',
+  covid19: 'COVID-19',
+};
+
+// Doenças/condições pré-existentes (checklist da aba Saúde). "Outros" é campo
+// de texto livre à parte (doencas_outros).
+export const DOENCAS_PREEXISTENTES = [
+  'diabetes', 'hipertensao', 'asma', 'epilepsia', 'cardiopatia', 'anemia_falciforme',
+  'obesidade', 'doenca_renal', 'rinite', 'tdah', 'tea',
+];
+export const DOENCAS_PREEXISTENTES_LABEL = {
+  diabetes: 'Diabetes',
+  hipertensao: 'Pressão alta (hipertensão)',
+  asma: 'Asma',
+  epilepsia: 'Epilepsia (convulsões)',
+  cardiopatia: 'Doença cardíaca (cardiopatia)',
+  anemia_falciforme: 'Anemia falciforme',
+  obesidade: 'Obesidade',
+  doenca_renal: 'Doença renal crônica',
+  rinite: 'Rinite alérgica',
+  tdah: 'TDAH',
+  tea: 'Autismo (TEA)',
+};
+
 // --- Documentos do aluno ---
 export const CATEGORIAS_DOCUMENTO = ['saude', 'social', 'escolar', 'outro'];
 export const CATEGORIAS_DOCUMENTO_LABEL = {

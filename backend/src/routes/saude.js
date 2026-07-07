@@ -5,21 +5,57 @@
 // sintomas semelhantes num curto período.
 
 import { Router } from 'express';
+import { unlink } from 'node:fs/promises';
+import { join } from 'node:path';
 import db from '../db.js';
-import { VACINACAO_STATUS, LIMITE_SINTOMAS } from '../constants.js';
+import { VACINACAO_STATUS, VACINAS, DOENCAS_PREEXISTENTES, LIMITE_SINTOMAS } from '../constants.js';
 import { alunoNoEscopo } from '../alunoEscopo.js';
 import { notificar } from '../notificador.js';
+import { uploadDocumento, caminhoPublico, UPLOADS_DIR } from '../uploads.js';
 
 const router = Router();
 
 const obterSaude = db.prepare('SELECT * FROM saude_aluno WHERE aluno_id = ?');
+// Campos textuais/booleanos da aba Saúde. Anexos (cartão de vacina, receita) e a
+// data de atualização da carteira ficam FORA deste upsert para não serem
+// apagados quando o formulário é salvo sem reenviar o arquivo.
 const upsertSaude = db.prepare(`
-  INSERT INTO saude_aluno (aluno_id, vacinacao_status, vacinas, alergias, atualizado_em)
-  VALUES (@aluno_id, @vacinacao_status, @vacinas, @alergias, datetime('now'))
+  INSERT INTO saude_aluno
+    (aluno_id, vacinacao_status, vacinas, alergias,
+     vacinas_tomadas, doencas, doencas_outros, usa_medicamento_controlado, medicamentos,
+     atualizado_em)
+  VALUES
+    (@aluno_id, @vacinacao_status, @vacinas, @alergias,
+     @vacinas_tomadas, @doencas, @doencas_outros, @usa_medicamento_controlado, @medicamentos,
+     datetime('now'))
   ON CONFLICT(aluno_id) DO UPDATE SET
     vacinacao_status = excluded.vacinacao_status,
     vacinas = excluded.vacinas,
     alergias = excluded.alergias,
+    vacinas_tomadas = excluded.vacinas_tomadas,
+    doencas = excluded.doencas,
+    doencas_outros = excluded.doencas_outros,
+    usa_medicamento_controlado = excluded.usa_medicamento_controlado,
+    medicamentos = excluded.medicamentos,
+    atualizado_em = datetime('now')
+`);
+
+// Grava só o caminho do cartão de vacina (carimba a data de atualização da
+// carteira). Cria a linha se ainda não existir (usa os defaults do schema).
+const salvarCartaoVacina = db.prepare(`
+  INSERT INTO saude_aluno (aluno_id, cartao_vacina, vacinacao_atualizada_em, atualizado_em)
+  VALUES (@aluno_id, @arquivo, datetime('now'), datetime('now'))
+  ON CONFLICT(aluno_id) DO UPDATE SET
+    cartao_vacina = excluded.cartao_vacina,
+    vacinacao_atualizada_em = datetime('now'),
+    atualizado_em = datetime('now')
+`);
+// Grava só o caminho da receita médica.
+const salvarReceita = db.prepare(`
+  INSERT INTO saude_aluno (aluno_id, receita, atualizado_em)
+  VALUES (@aluno_id, @arquivo, datetime('now'))
+  ON CONFLICT(aluno_id) DO UPDATE SET
+    receita = excluded.receita,
     atualizado_em = datetime('now')
 `);
 
@@ -44,6 +80,24 @@ function tokens(csv) {
     .split(/[,;]+/)
     .map((t) => t.trim().toLowerCase())
     .filter(Boolean);
+}
+
+// Normaliza uma seleção de checklist (array ou CSV) mantendo só os valores
+// permitidos, sem duplicatas, e devolve um CSV (ou null se vazio).
+function normalizarLista(valor, permitidos) {
+  const bruto = Array.isArray(valor)
+    ? valor.map((t) => String(t).trim().toLowerCase())
+    : tokens(valor);
+  const set = new Set(permitidos);
+  const filtrados = [...new Set(bruto)].filter((t) => set.has(t));
+  return filtrados.length ? filtrados.join(',') : null;
+}
+
+// Remove o arquivo físico de um anexo antigo (ignora se já não existir).
+async function removerArquivo(caminhoPub) {
+  if (!caminhoPub) return;
+  const nome = caminhoPub.replace(/^\/uploads\//, '');
+  await unlink(join(UPLOADS_DIR, nome)).catch(() => {});
 }
 
 // Após registrar um sintoma, verifica se o limite por turma foi atingido.
@@ -78,6 +132,14 @@ router.get('/:alunoId', (req, res) => {
     vacinacao_status: 'pendente',
     vacinas: null,
     alergias: null,
+    vacinas_tomadas: null,
+    cartao_vacina: null,
+    vacinacao_atualizada_em: null,
+    doencas: null,
+    doencas_outros: null,
+    usa_medicamento_controlado: 0,
+    medicamentos: null,
+    receita: null,
   };
   saude.sintomas = listarSintomas.all(aluno.id);
   res.json(saude);
@@ -92,12 +154,63 @@ router.put('/:alunoId', (req, res) => {
   if (!VACINACAO_STATUS.includes(vacinacao_status)) {
     return res.status(400).json({ erro: `Status de vacinação inválido. Use: ${VACINACAO_STATUS.join(', ')}.` });
   }
+  const usaMedicamento = req.body.usa_medicamento_controlado ? 1 : 0;
   upsertSaude.run({
     aluno_id: aluno.id,
     vacinacao_status,
     vacinas: req.body.vacinas || null,
     alergias: req.body.alergias || null,
+    vacinas_tomadas: normalizarLista(req.body.vacinas_tomadas, VACINAS),
+    doencas: normalizarLista(req.body.doencas, DOENCAS_PREEXISTENTES),
+    doencas_outros: req.body.doencas_outros || null,
+    usa_medicamento_controlado: usaMedicamento,
+    // Só faz sentido guardar quais medicamentos se o aluno usa algum.
+    medicamentos: usaMedicamento ? (req.body.medicamentos || null) : null,
   });
+  res.json(obterSaude.get(aluno.id));
+});
+
+// POST /api/saude/:alunoId/cartao-vacina → anexa a carteira de vacina (campo "arquivo")
+router.post('/:alunoId/cartao-vacina', uploadDocumento, async (req, res) => {
+  const aluno = alunoNoEscopo(req, req.params.alunoId);
+  if (!aluno) return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  if (!req.file) return res.status(400).json({ erro: 'Envie um arquivo no campo "arquivo".' });
+
+  const anterior = obterSaude.get(aluno.id)?.cartao_vacina;
+  salvarCartaoVacina.run({ aluno_id: aluno.id, arquivo: caminhoPublico(req.file) });
+  await removerArquivo(anterior); // remove o anexo substituído
+  res.status(201).json(obterSaude.get(aluno.id));
+});
+
+// DELETE /api/saude/:alunoId/cartao-vacina → remove a carteira de vacina anexada
+router.delete('/:alunoId/cartao-vacina', async (req, res) => {
+  const aluno = alunoNoEscopo(req, req.params.alunoId);
+  if (!aluno) return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  const atual = obterSaude.get(aluno.id)?.cartao_vacina;
+  salvarCartaoVacina.run({ aluno_id: aluno.id, arquivo: null });
+  await removerArquivo(atual);
+  res.json(obterSaude.get(aluno.id));
+});
+
+// POST /api/saude/:alunoId/receita → anexa a receita médica (campo "arquivo")
+router.post('/:alunoId/receita', uploadDocumento, async (req, res) => {
+  const aluno = alunoNoEscopo(req, req.params.alunoId);
+  if (!aluno) return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  if (!req.file) return res.status(400).json({ erro: 'Envie um arquivo no campo "arquivo".' });
+
+  const anterior = obterSaude.get(aluno.id)?.receita;
+  salvarReceita.run({ aluno_id: aluno.id, arquivo: caminhoPublico(req.file) });
+  await removerArquivo(anterior);
+  res.status(201).json(obterSaude.get(aluno.id));
+});
+
+// DELETE /api/saude/:alunoId/receita → remove a receita médica anexada
+router.delete('/:alunoId/receita', async (req, res) => {
+  const aluno = alunoNoEscopo(req, req.params.alunoId);
+  if (!aluno) return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  const atual = obterSaude.get(aluno.id)?.receita;
+  salvarReceita.run({ aluno_id: aluno.id, arquivo: null });
+  await removerArquivo(atual);
   res.json(obterSaude.get(aluno.id));
 });
 

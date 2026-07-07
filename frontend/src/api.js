@@ -152,6 +152,15 @@ export const api = {
     requisicao(`/saude/${alunoId}`, { method: 'PUT', body: JSON.stringify(dados) }),
   registrarSintoma: (alunoId, dados) =>
     requisicao(`/saude/${alunoId}/sintomas`, { method: 'POST', body: JSON.stringify(dados) }),
+  // Anexos de saúde (carteira de vacina / receita médica) — multipart, campo "arquivo".
+  enviarCartaoVacina: (alunoId, formData) =>
+    requisicaoForm(`/saude/${alunoId}/cartao-vacina`, formData, 'POST'),
+  removerCartaoVacina: (alunoId) =>
+    requisicao(`/saude/${alunoId}/cartao-vacina`, { method: 'DELETE' }),
+  enviarReceita: (alunoId, formData) =>
+    requisicaoForm(`/saude/${alunoId}/receita`, formData, 'POST'),
+  removerReceita: (alunoId) =>
+    requisicao(`/saude/${alunoId}/receita`, { method: 'DELETE' }),
 
   // --- Eixo B: Assistência Social ---
   obterAssistencia: (alunoId) => requisicao(`/assistencia/${alunoId}`),
@@ -256,6 +265,30 @@ export const ROTULOS = {
   },
   vacinacao: { em_dia: 'Em dia', pendente: 'Pendente' },
   categoriaDocumento: { saude: 'Saúde', social: 'Social', escolar: 'Escolar', outro: 'Outro' },
+  // Checklist de vacinas do calendário do adolescente (mesma ordem do backend).
+  vacinas: {
+    hpv: 'HPV',
+    hepatite_b: 'Hepatite B',
+    triplice_viral: 'Tríplice viral (sarampo/caxumba/rubéola)',
+    dt_dtpa: 'dT/dTpa (difteria e tétano)',
+    febre_amarela: 'Febre amarela',
+    meningococica: 'Meningocócica ACWY',
+    covid19: 'COVID-19',
+  },
+  // Checklist de doenças/condições pré-existentes.
+  doencas: {
+    diabetes: 'Diabetes',
+    hipertensao: 'Pressão alta (hipertensão)',
+    asma: 'Asma',
+    epilepsia: 'Epilepsia (convulsões)',
+    cardiopatia: 'Doença cardíaca (cardiopatia)',
+    anemia_falciforme: 'Anemia falciforme',
+    obesidade: 'Obesidade',
+    doenca_renal: 'Doença renal crônica',
+    rinite: 'Rinite alérgica',
+    tdah: 'TDAH',
+    tea: 'Autismo (TEA)',
+  },
 };
 
 // Emoji de cada categoria de problema de infraestrutura (usado nos botões,

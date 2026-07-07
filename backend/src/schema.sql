@@ -140,8 +140,16 @@ CREATE TABLE IF NOT EXISTS saude_aluno (
   aluno_id         INTEGER PRIMARY KEY,      -- 1 registro por aluno
   vacinacao_status TEXT    NOT NULL DEFAULT 'pendente'
                            CHECK (vacinacao_status IN ('em_dia', 'pendente')),
-  vacinas          TEXT,                     -- histórico livre (ex.: "Tríplice, Febre amarela")
+  vacinas          TEXT,                     -- observações livres sobre vacinas
   alergias         TEXT,                     -- lista de alergias graves
+  vacinas_tomadas          TEXT,             -- CSV de vacinas do checklist
+  cartao_vacina            TEXT,             -- caminho do anexo (carteira de vacina)
+  vacinacao_atualizada_em  TEXT,             -- data da última atualização da carteira
+  doencas                  TEXT,             -- CSV de doenças pré-existentes
+  doencas_outros           TEXT,             -- condições fora da lista (texto livre)
+  usa_medicamento_controlado INTEGER NOT NULL DEFAULT 0,
+  medicamentos             TEXT,             -- quais medicamentos controlados
+  receita                  TEXT,             -- caminho do anexo (receita médica)
   atualizado_em    TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
 );

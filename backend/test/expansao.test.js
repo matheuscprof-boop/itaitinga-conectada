@@ -100,6 +100,73 @@ test('Eixo A: sintomas na turma disparam alerta automático de surto', async () 
   assert.ok(notifs.dados.notificacoes.some((n) => /surto/i.test(n.titulo)));
 });
 
+test('Eixo A: checklist de vacinas/doenças e medicamento controlado', async () => {
+  const put = await api(`/api/saude/${estado.alunos[0]}`, {
+    token: estado.adminToken,
+    method: 'PUT',
+    body: {
+      vacinacao_status: 'em_dia',
+      vacinas_tomadas: ['hpv', 'covid19', 'INVALIDA'],
+      doencas: ['asma', 'tea'],
+      doencas_outros: 'Escoliose',
+      usa_medicamento_controlado: 1,
+      medicamentos: 'Metilfenidato',
+    },
+  });
+  assert.equal(put.status, 200);
+  // Valores fora da lista permitida são descartados.
+  assert.equal(put.dados.vacinas_tomadas, 'hpv,covid19');
+  assert.equal(put.dados.doencas, 'asma,tea');
+  assert.equal(put.dados.doencas_outros, 'Escoliose');
+  assert.equal(put.dados.usa_medicamento_controlado, 1);
+  assert.equal(put.dados.medicamentos, 'Metilfenidato');
+});
+
+test('Eixo A: desmarcar medicamento controlado limpa os medicamentos', async () => {
+  const put = await api(`/api/saude/${estado.alunos[0]}`, {
+    token: estado.adminToken,
+    method: 'PUT',
+    body: { vacinacao_status: 'em_dia', usa_medicamento_controlado: 0, medicamentos: 'ignorar' },
+  });
+  assert.equal(put.dados.usa_medicamento_controlado, 0);
+  assert.equal(put.dados.medicamentos, null);
+});
+
+test('Eixo A: anexa/remove carteira de vacina sem apagar os demais campos', async () => {
+  const fd = new FormData();
+  fd.append('arquivo', new Blob([Buffer.from('%PDF-1.4 vacina')], { type: 'application/pdf' }), 'carteira.pdf');
+  const up = await fetch(`${base}/api/saude/${estado.alunos[0]}/cartao-vacina`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${estado.adminToken}` },
+    body: fd,
+  });
+  assert.equal(up.status, 201);
+  const saude = await up.json();
+  assert.match(saude.cartao_vacina, /^\/uploads\//);
+  assert.ok(saude.vacinacao_atualizada_em, 'a data de atualização deve ser carimbada');
+  // O upsert do anexo é separado: não zera o que foi salvo pelo PUT.
+  assert.equal(saude.vacinacao_status, 'em_dia');
+
+  const del = await api(`/api/saude/${estado.alunos[0]}/cartao-vacina`, {
+    token: estado.adminToken, method: 'DELETE',
+  });
+  assert.equal(del.status, 200);
+  assert.equal(del.dados.cartao_vacina, null);
+});
+
+test('Eixo A: anexa a receita médica', async () => {
+  const fd = new FormData();
+  fd.append('arquivo', new Blob([Buffer.from('89504E470D0A1A0A', 'hex')], { type: 'image/png' }), 'receita.png');
+  const up = await fetch(`${base}/api/saude/${estado.alunos[0]}/receita`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${estado.adminToken}` },
+    body: fd,
+  });
+  assert.equal(up.status, 201);
+  const saude = await up.json();
+  assert.match(saude.receita, /^\/uploads\//);
+});
+
 test('Eixo B: geolocalização em área de risco é sinalizada e notificada', async () => {
   db.prepare("INSERT INTO areas_risco (nome, latitude, longitude, raio_km) VALUES ('Centro', -3.97, -38.52, 2)").run();
   const r = await api(`/api/assistencia/${estado.alunos[0]}`, {

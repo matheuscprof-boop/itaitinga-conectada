@@ -24,6 +24,17 @@ export function migrar(db) {
   // 2b) Endereço residencial na assistência (origem da geolocalização por GPS).
   garantirColuna(db, 'assistencia_aluno', 'endereco', 'TEXT');
 
+  // 2b2) Eixo Saúde: vacinação estruturada + anexos + doenças pré-existentes +
+  //      medicamentos controlados.
+  garantirColuna(db, 'saude_aluno', 'vacinas_tomadas', 'TEXT');
+  garantirColuna(db, 'saude_aluno', 'cartao_vacina', 'TEXT');
+  garantirColuna(db, 'saude_aluno', 'vacinacao_atualizada_em', 'TEXT');
+  garantirColuna(db, 'saude_aluno', 'doencas', 'TEXT');
+  garantirColuna(db, 'saude_aluno', 'doencas_outros', 'TEXT');
+  garantirColuna(db, 'saude_aluno', 'usa_medicamento_controlado', 'INTEGER NOT NULL DEFAULT 0');
+  garantirColuna(db, 'saude_aluno', 'medicamentos', 'TEXT');
+  garantirColuna(db, 'saude_aluno', 'receita', 'TEXT');
+
   // 2c) Verificação de e-mail + dados de vínculo (equipe/gestão). O DEFAULT 1
   //     em email_verificado marca as contas já existentes como verificadas
   //     (para não trancar quem já usava o sistema); o autocadastro grava 0.

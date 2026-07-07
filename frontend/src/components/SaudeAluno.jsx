@@ -1,6 +1,17 @@
-// Eixo A — Saúde Escolar do aluno: vacinação, alergias e registro de sintomas.
+// Eixo A — Saúde Escolar do aluno: vacinação (status + checklist + carteira),
+// alergias, doenças pré-existentes, medicamentos controlados (com receita) e
+// registro diário de sintomas.
 import { useEffect, useState } from 'react';
 import { api, ROTULOS } from '../api.js';
+
+// Utilitários para tratar as seleções de checklist como CSV (formato do banco).
+function csvArr(v) {
+  return v ? String(v).split(',').filter(Boolean) : [];
+}
+function toggleCsv(v, item) {
+  const arr = csvArr(v);
+  return (arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item]).join(',');
+}
 
 export default function SaudeAluno({ alunoId, podeEditar = true }) {
   const [dados, setDados] = useState(null);
@@ -22,8 +33,38 @@ export default function SaudeAluno({ alunoId, podeEditar = true }) {
         vacinacao_status: dados.vacinacao_status,
         vacinas: dados.vacinas,
         alergias: dados.alergias,
+        vacinas_tomadas: dados.vacinas_tomadas || '',
+        doencas: dados.doencas || '',
+        doencas_outros: dados.doencas_outros,
+        usa_medicamento_controlado: dados.usa_medicamento_controlado ? 1 : 0,
+        medicamentos: dados.medicamentos,
       });
       setOk('Dados de saúde salvos.');
+    } catch (err) { setErro(err.message); }
+  }
+
+  // Envia um anexo (carteira de vacina ou receita) e mescla a resposta.
+  async function enviarAnexo(tipo, file) {
+    if (!file) return;
+    setErro(''); setOk('');
+    const fd = new FormData();
+    fd.append('arquivo', file);
+    try {
+      const atualizado = tipo === 'cartao'
+        ? await api.enviarCartaoVacina(alunoId, fd)
+        : await api.enviarReceita(alunoId, fd);
+      setDados((d) => ({ ...d, ...atualizado }));
+      setOk('Anexo enviado.');
+    } catch (err) { setErro(err.message); }
+  }
+
+  async function removerAnexo(tipo) {
+    setErro(''); setOk('');
+    try {
+      const atualizado = tipo === 'cartao'
+        ? await api.removerCartaoVacina(alunoId)
+        : await api.removerReceita(alunoId);
+      setDados((d) => ({ ...d, ...atualizado }));
     } catch (err) { setErro(err.message); }
   }
 
@@ -43,13 +84,40 @@ export default function SaudeAluno({ alunoId, podeEditar = true }) {
 
   if (!dados) return <p className="vazio" role="status">Carregando…</p>;
 
+  // Bloco reutilizável de anexo (link p/ ver + enviar/remover).
+  function Anexo({ tipo, arquivo, rotulo }) {
+    return (
+      <div className="anexo-saude">
+        {arquivo ? (
+          <span className="anexo-saude__atual">
+            <a href={arquivo} target="_blank" rel="noreferrer">📎 Ver {rotulo}</a>
+            {podeEditar && (
+              <button type="button" className="btn btn--link" onClick={() => removerAnexo(tipo)}>
+                remover
+              </button>
+            )}
+          </span>
+        ) : (
+          <span className="vazio">Nenhum arquivo anexado.</span>
+        )}
+        {podeEditar && (
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            onChange={(e) => { enviarAnexo(tipo, e.target.files[0]); e.target.value = ''; }}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="eixo-secao">
       {erro && <p className="alerta-erro" role="alert">{erro}</p>}
       {ok && <p className="alerta-sucesso" role="status">{ok}</p>}
 
       <form className="card form" onSubmit={salvar}>
-        <h3>Vacinação e alergias</h3>
+        <h3>Vacinação</h3>
         <div className="eixo-grid">
           <div className="campo">
             <label htmlFor="vac">Situação da vacinação</label>
@@ -62,16 +130,77 @@ export default function SaudeAluno({ alunoId, podeEditar = true }) {
             </select>
           </div>
           <div className="campo">
-            <label htmlFor="vacinas">Histórico de vacinas</label>
+            <label htmlFor="vacinas">Observações sobre vacinas</label>
             <input id="vacinas" value={dados.vacinas || ''} disabled={!podeEditar}
               onChange={(e) => setDados({ ...dados, vacinas: e.target.value })} />
           </div>
         </div>
+
+        <fieldset className="checklist">
+          <legend>Vacinas tomadas</legend>
+          {Object.entries(ROTULOS.vacinas).map(([v, r]) => (
+            <label key={v} className="checklist-item">
+              <input type="checkbox" disabled={!podeEditar}
+                checked={csvArr(dados.vacinas_tomadas).includes(v)}
+                onChange={() => setDados({ ...dados, vacinas_tomadas: toggleCsv(dados.vacinas_tomadas, v) })} />
+              {r}
+            </label>
+          ))}
+        </fieldset>
+
+        <div className="campo">
+          <label>Carteira de vacina (imagem ou PDF)</label>
+          <Anexo tipo="cartao" arquivo={dados.cartao_vacina} rotulo="carteira" />
+          {dados.vacinacao_atualizada_em && (
+            <small className="vazio">Atualizada em {dados.vacinacao_atualizada_em}</small>
+          )}
+        </div>
+
+        <h3>Saúde geral</h3>
         <div className="campo">
           <label htmlFor="alergias">Alergias graves</label>
           <textarea id="alergias" rows={2} value={dados.alergias || ''} disabled={!podeEditar}
             onChange={(e) => setDados({ ...dados, alergias: e.target.value })} />
         </div>
+
+        <fieldset className="checklist">
+          <legend>Doenças / condições pré-existentes</legend>
+          {Object.entries(ROTULOS.doencas).map(([d, r]) => (
+            <label key={d} className="checklist-item">
+              <input type="checkbox" disabled={!podeEditar}
+                checked={csvArr(dados.doencas).includes(d)}
+                onChange={() => setDados({ ...dados, doencas: toggleCsv(dados.doencas, d) })} />
+              {r}
+            </label>
+          ))}
+        </fieldset>
+        <div className="campo">
+          <label htmlFor="doencas-outros">Outras condições (não listadas)</label>
+          <input id="doencas-outros" value={dados.doencas_outros || ''} disabled={!podeEditar}
+            onChange={(e) => setDados({ ...dados, doencas_outros: e.target.value })} />
+        </div>
+
+        <h3>Medicamentos controlados</h3>
+        <label className="checklist-item">
+          <input type="checkbox" disabled={!podeEditar}
+            checked={!!dados.usa_medicamento_controlado}
+            onChange={(e) => setDados({ ...dados, usa_medicamento_controlado: e.target.checked ? 1 : 0 })} />
+          O aluno usa medicamento controlado de uso contínuo
+        </label>
+        {!!dados.usa_medicamento_controlado && (
+          <>
+            <div className="campo">
+              <label htmlFor="medicamentos">Quais medicamentos</label>
+              <textarea id="medicamentos" rows={2} value={dados.medicamentos || ''} disabled={!podeEditar}
+                onChange={(e) => setDados({ ...dados, medicamentos: e.target.value })} />
+            </div>
+            <div className="campo">
+              <label>Receita médica (imagem ou PDF)</label>
+              <Anexo tipo="receita" arquivo={dados.receita} rotulo="receita" />
+            </div>
+          </>
+        )}
+
         {podeEditar && <button className="btn btn--primario" type="submit">Salvar saúde</button>}
       </form>
 

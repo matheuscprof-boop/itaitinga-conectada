@@ -620,6 +620,16 @@ body {
 .logbook-foto__remover { position: absolute; top: 4px; right: 4px; background: rgba(255,255,255,0.9); border: 1px solid var(--cor-borda); border-radius: 4px; cursor: pointer; padding: 0 0.4rem; }
 .sintoma-item { border-bottom: 1px solid var(--cor-borda); padding: 0.4rem 0; font-size: 0.88rem; }
 
+/* Checklists de saúde (vacinas, doenças) e anexos (carteira/receita) */
+.checklist { border: 1px solid var(--cor-borda); border-radius: 8px; padding: 0.6rem 0.9rem; margin: 0.25rem 0; display: grid; gap: 0.35rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.checklist legend { font-weight: 600; font-size: 0.85rem; color: var(--cor-texto-suave); padding: 0 0.3rem; }
+.checklist-item { display: flex; align-items: center; gap: 0.45rem; font-size: 0.9rem; }
+.checklist-item input[type="checkbox"] { width: auto; min-width: 0; margin: 0; }
+.anexo-saude { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.anexo-saude__atual { display: inline-flex; align-items: center; gap: 0.5rem; }
+.anexo-saude input[type="file"] { min-width: 0; max-width: 100%; }
+.btn--link { background: none; border: none; color: var(--cor-perigo); cursor: pointer; padding: 0; font-size: 0.82rem; text-decoration: underline; }
+
 /* Documentos do aluno */
 .doc-cabecalho { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .doc-filtro { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: var(--cor-texto-suave); }
