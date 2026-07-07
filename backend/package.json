@@ -11,6 +11,7 @@
     "seed:escolas": "node src/seed-escolas.js",
     "seed:alunos": "node src/seed-alunos-ficticios.js",
     "seed:alertas": "node src/seed-alertas-ficticios.js",
+    "seed:datas": "node src/redistribuir-datas-alertas.js",
     "test": "node --test"
   },
   "dependencies": {

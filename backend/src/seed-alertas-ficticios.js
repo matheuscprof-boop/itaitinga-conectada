@@ -8,6 +8,7 @@
 // notificação no feed da gestão (como na aplicação real).
 
 import db from './db.js';
+import { dataFicticia } from './datas-ficticias.js';
 
 const alunos = db.prepare('SELECT id, nome, turma, escola_id FROM alunos ORDER BY id').all();
 if (alunos.length === 0) {
@@ -25,12 +26,12 @@ const TITULOS = {
 
 const temAlerta = db.prepare('SELECT 1 FROM alertas WHERE aluno_id = ? LIMIT 1');
 const inserirAlerta = db.prepare(`
-  INSERT INTO alertas (aluno_id, eixo, nivel, titulo, descricao, status)
-  VALUES (@aluno_id, @eixo, @nivel, @titulo, @descricao, @status)
+  INSERT INTO alertas (aluno_id, eixo, nivel, titulo, descricao, status, criado_em, atualizado_em)
+  VALUES (@aluno_id, @eixo, @nivel, @titulo, @descricao, @status, @criado_em, @criado_em)
 `);
 const inserirHist = db.prepare(`
-  INSERT INTO alerta_historico (alerta_id, tipo, texto, status_novo, autor_nome)
-  VALUES (@alerta_id, 'mudanca_status', 'Alerta registrado (dados fictícios).', @status, 'Seed')
+  INSERT INTO alerta_historico (alerta_id, tipo, texto, status_novo, autor_nome, criado_em)
+  VALUES (@alerta_id, 'mudanca_status', 'Alerta registrado (dados fictícios).', @status, 'Seed', @criado_em)
 `);
 const inserirNotif = db.prepare(`
   INSERT INTO notificacoes (alerta_id, escola_id, aluno_nome, titulo, mensagem)
@@ -67,13 +68,15 @@ const popular = db.transaction(() => {
         ? (s % 2 === 0 ? 'aberto' : 'em_andamento')
         : (st < 2 ? 'aberto' : st === 2 ? 'em_andamento' : 'resolvido');
       const titulo = TITULOS[eixo][s % TITULOS[eixo].length];
+      // Data espalhada nos últimos ~6 meses (para o gráfico de evolução).
+      const criado_em = dataFicticia(s);
 
       const { lastInsertRowid } = inserirAlerta.run({
         aluno_id: a.id, eixo, nivel, titulo,
         descricao: `Acompanhamento do(a) aluno(a) da turma ${a.turma}.`,
-        status,
+        status, criado_em,
       });
-      inserirHist.run({ alerta_id: lastInsertRowid, status });
+      inserirHist.run({ alerta_id: lastInsertRowid, status, criado_em });
       alertas++;
 
       if (nivel === 'alto') {
