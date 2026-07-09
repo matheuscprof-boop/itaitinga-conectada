@@ -19,7 +19,7 @@ const router = Router();
 // Projeção pública: expõe o nome do autor apenas quando não é anônimo e
 // NUNCA expõe o cidadao_id.
 const SELECT_PUBLICO = `
-  SELECT ai.id, ai.categoria, ai.descricao, ai.foto, ai.latitude, ai.longitude,
+  SELECT ai.id, ai.categoria, ai.descricao, ai.foto, ai.bairro, ai.latitude, ai.longitude,
          ai.anonimo, ai.status, ai.criado_em, ai.atualizado_em,
          CASE WHEN ai.anonimo = 1 THEN NULL ELSE u.nome END AS autor_nome
   FROM alertas_infra ai
@@ -27,9 +27,13 @@ const SELECT_PUBLICO = `
 `;
 
 const inserir = db.prepare(`
-  INSERT INTO alertas_infra (categoria, descricao, foto, latitude, longitude, anonimo, cidadao_id)
-  VALUES (@categoria, @descricao, @foto, @latitude, @longitude, @anonimo, @cidadao_id)
+  INSERT INTO alertas_infra (categoria, descricao, foto, bairro, latitude, longitude, anonimo, cidadao_id)
+  VALUES (@categoria, @descricao, @foto, @bairro, @latitude, @longitude, @anonimo, @cidadao_id)
 `);
+// Bairros distintos já usados (para alimentar o filtro e as sugestões do formulário).
+const listarBairros = db.prepare(
+  "SELECT DISTINCT bairro FROM alertas_infra WHERE bairro IS NOT NULL AND TRIM(bairro) <> '' ORDER BY bairro COLLATE NOCASE"
+);
 const obterPublico = db.prepare(`${SELECT_PUBLICO} WHERE ai.id = ?`);
 const existe = db.prepare('SELECT id, status FROM alertas_infra WHERE id = ?');
 const atualizarStatus = db.prepare(
@@ -58,8 +62,20 @@ router.get('/alertas', (req, res) => {
     cond.push('ai.status = @status');
     params.status = req.query.status;
   }
+  // Filtro por bairro (comparação sem diferenciar maiúsculas/acentuação básica).
+  if (req.query.bairro && req.query.bairro.trim()) {
+    cond.push('ai.bairro = @bairro COLLATE NOCASE');
+    params.bairro = req.query.bairro.trim();
+  }
   const where = cond.length ? ` WHERE ${cond.join(' AND ')}` : '';
   res.json(db.prepare(`${SELECT_PUBLICO}${where} ORDER BY ai.criado_em DESC`).all(params));
+});
+
+// GET /api/infra/bairros  → lista de bairros distintos (para o filtro/sugestões).
+// Definida ANTES de '/alertas/:id' não é necessário (caminho distinto), mas
+// mantida aqui junto das leituras públicas.
+router.get('/bairros', (_req, res) => {
+  res.json(listarBairros.all().map((l) => l.bairro));
 });
 
 // GET /api/infra/alertas/:id  → detalhe público
@@ -85,6 +101,7 @@ router.post('/alertas', autenticar, exigirPerfil(PERFIL_CIDADAO), uploadFoto, (r
     categoria,
     descricao,
     foto: caminhoPublico(req.file),
+    bairro: (req.body.bairro ?? '').trim() || null,
     latitude: numeroOuNulo(req.body.latitude),
     longitude: numeroOuNulo(req.body.longitude),
     anonimo: anonimo ? 1 : 0,

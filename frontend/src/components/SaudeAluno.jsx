@@ -13,7 +13,8 @@ function toggleCsv(v, item) {
   return (arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item]).join(',');
 }
 
-export default function SaudeAluno({ alunoId, podeEditar = true }) {
+export default function SaudeAluno({ alunoId, sexo = null, podeEditar = true }) {
+  const feminino = sexo === 'feminino';
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState('');
   const [ok, setOk] = useState('');
@@ -38,6 +39,11 @@ export default function SaudeAluno({ alunoId, podeEditar = true }) {
         doencas_outros: dados.doencas_outros,
         usa_medicamento_controlado: dados.usa_medicamento_controlado ? 1 : 0,
         medicamentos: dados.medicamentos,
+        peso: dados.peso ?? '',
+        altura: dados.altura ?? '',
+        // Gestação: só enviada para alunas (o backend também garante isso).
+        gravidez: feminino && dados.gravidez ? 1 : 0,
+        gravidez_historico: feminino && dados.gravidez_historico ? 1 : 0,
       });
       setOk('Dados de saúde salvos.');
     } catch (err) { setErro(err.message); }
@@ -83,6 +89,18 @@ export default function SaudeAluno({ alunoId, podeEditar = true }) {
   }
 
   if (!dados) return <p className="vazio" role="status">Carregando…</p>;
+
+  // IMC = peso / altura². Só exibe quando ambos são números válidos.
+  const imc = (() => {
+    const p = Number(String(dados.peso ?? '').replace(',', '.'));
+    const a = Number(String(dados.altura ?? '').replace(',', '.'));
+    if (!(p > 0) || !(a > 0)) return null;
+    const valor = p / (a * a);
+    const faixa = valor < 18.5 ? 'abaixo do peso'
+      : valor < 25 ? 'peso adequado'
+      : valor < 30 ? 'sobrepeso' : 'obesidade';
+    return { valor: valor.toFixed(1), faixa };
+  })();
 
   // Bloco reutilizável de anexo (link p/ ver + enviar/remover).
   function Anexo({ tipo, arquivo, rotulo }) {
@@ -157,11 +175,49 @@ export default function SaudeAluno({ alunoId, podeEditar = true }) {
         </div>
 
         <h3>Saúde geral</h3>
+        <div className="eixo-grid">
+          <div className="campo">
+            <label htmlFor="peso">Peso (kg)</label>
+            <input id="peso" type="number" step="0.1" min="0" inputMode="decimal"
+              value={dados.peso ?? ''} disabled={!podeEditar} placeholder="ex.: 54.5"
+              onChange={(e) => setDados({ ...dados, peso: e.target.value })} />
+          </div>
+          <div className="campo">
+            <label htmlFor="altura">Altura (m)</label>
+            <input id="altura" type="number" step="0.01" min="0" inputMode="decimal"
+              value={dados.altura ?? ''} disabled={!podeEditar} placeholder="ex.: 1.62"
+              onChange={(e) => setDados({ ...dados, altura: e.target.value })} />
+          </div>
+        </div>
+        {imc && (
+          <p className="vazio" aria-live="polite">
+            IMC calculado: <strong>{imc.valor}</strong> ({imc.faixa})
+          </p>
+        )}
+
         <div className="campo">
           <label htmlFor="alergias">Alergias graves</label>
           <textarea id="alergias" rows={2} value={dados.alergias || ''} disabled={!podeEditar}
             onChange={(e) => setDados({ ...dados, alergias: e.target.value })} />
         </div>
+
+        {feminino && (
+          <>
+            <h3>Saúde da estudante (gestação)</h3>
+            <label className="checklist-item">
+              <input type="checkbox" disabled={!podeEditar}
+                checked={!!dados.gravidez}
+                onChange={(e) => setDados({ ...dados, gravidez: e.target.checked ? 1 : 0 })} />
+              Está grávida atualmente
+            </label>
+            <label className="checklist-item">
+              <input type="checkbox" disabled={!podeEditar}
+                checked={!!dados.gravidez_historico}
+                onChange={(e) => setDados({ ...dados, gravidez_historico: e.target.checked ? 1 : 0 })} />
+              Possui histórico de gestação
+            </label>
+          </>
+        )}
 
         <fieldset className="checklist">
           <legend>Doenças / condições pré-existentes</legend>

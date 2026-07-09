@@ -167,6 +167,39 @@ test('Eixo A: anexa a receita médica', async () => {
   assert.match(saude.receita, /^\/uploads\//);
 });
 
+test('Eixo A: peso/altura salvam; gestação só vale para alunas', async () => {
+  // Cria uma aluna (sexo feminino).
+  const aluna = await api('/api/alunos', {
+    token: estado.adminToken,
+    method: 'POST',
+    body: { nome: 'Duda', matricula: 'MDuda', turma: '9A', sexo: 'feminino', escola_id: estado.escolaId },
+  });
+  assert.equal(aluna.status, 201);
+  assert.equal(aluna.dados.sexo, 'feminino');
+
+  // Aluna: peso (aceita vírgula decimal), altura e gestação persistem.
+  const put = await api(`/api/saude/${aluna.dados.id}`, {
+    token: estado.adminToken,
+    method: 'PUT',
+    body: { vacinacao_status: 'pendente', peso: '54,5', altura: 1.6, gravidez: 1, gravidez_historico: 1 },
+  });
+  assert.equal(put.status, 200);
+  assert.equal(put.dados.peso, 54.5);
+  assert.equal(put.dados.altura, 1.6);
+  assert.equal(put.dados.gravidez, 1);
+  assert.equal(put.dados.gravidez_historico, 1);
+
+  // Aluno sem sexo feminino: peso/altura entram, mas gestação é forçada a 0.
+  const put2 = await api(`/api/saude/${estado.alunos[1]}`, {
+    token: estado.adminToken,
+    method: 'PUT',
+    body: { vacinacao_status: 'pendente', peso: 70, altura: 1.75, gravidez: 1, gravidez_historico: 1 },
+  });
+  assert.equal(put2.dados.peso, 70);
+  assert.equal(put2.dados.gravidez, 0);
+  assert.equal(put2.dados.gravidez_historico, 0);
+});
+
 test('Eixo B: geolocalização em área de risco é sinalizada e notificada', async () => {
   db.prepare("INSERT INTO areas_risco (nome, latitude, longitude, raio_km) VALUES ('Centro', -3.97, -38.52, 2)").run();
   const r = await api(`/api/assistencia/${estado.alunos[0]}`, {
@@ -355,6 +388,25 @@ test('Infra: só a Secretaria altera o status', async () => {
   });
   assert.equal(ok.status, 200);
   assert.equal(ok.dados.status, 'resolvido');
+});
+
+test('Infra: bairro é salvo, listado e filtra os alertas', async () => {
+  const criado = await api('/api/infra/alertas', {
+    token: estado.cidadaoToken,
+    method: 'POST',
+    body: { categoria: 'buraco', descricao: 'Buraco no Centro', bairro: 'Centro' },
+  });
+  assert.equal(criado.status, 201);
+  assert.equal(criado.dados.bairro, 'Centro');
+
+  // O bairro aparece na lista de bairros distintos (para o filtro).
+  const bairros = await (await fetch(`${base}/api/infra/bairros`)).json();
+  assert.ok(bairros.includes('Centro'));
+
+  // Filtro por bairro (case-insensitive) só retorna alertas do bairro.
+  const filtrado = await (await fetch(`${base}/api/infra/alertas?bairro=centro`)).json();
+  assert.ok(filtrado.length >= 1);
+  assert.ok(filtrado.every((a) => a.bairro === 'Centro'));
 });
 
 test('RBAC: cidadão é bloqueado nas áreas de dados de aluno', async () => {

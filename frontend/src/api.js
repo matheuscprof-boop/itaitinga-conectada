@@ -197,6 +197,7 @@ export const api = {
     return requisicao(`/infra/alertas${qs ? `?${qs}` : ''}`);
   },
   infraObterAlerta: (id) => requisicao(`/infra/alertas/${id}`),
+  infraListarBairros: () => requisicao('/infra/bairros'),
   infraCriarAlerta: (formData) => requisicaoForm('/infra/alertas', formData, 'POST'),
   infraAtualizarStatus: (id, status) =>
     requisicao(`/infra/alertas/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
@@ -252,6 +253,7 @@ export const ROTULOS = {
   eixo: { frequencia: 'Frequência', desempenho: 'Desempenho', socioemocional: 'Socioemocional' },
   nivel: { baixo: 'Baixo', medio: 'Médio', alto: 'Alto' },
   status: { aberto: 'Aberto', em_andamento: 'Em andamento', resolvido: 'Resolvido' },
+  sexo: { feminino: 'Feminino', masculino: 'Masculino', outro: 'Outro' },
   perfil: {
     professor: 'Professor(a)',
     coordenacao: 'Coordenação',

@@ -18,6 +18,9 @@ export function migrar(db) {
   garantirColuna(db, 'usuarios', 'escola_id', 'INTEGER');
   garantirColuna(db, 'notificacoes', 'escola_id', 'INTEGER');
 
+  // 1b) Sexo do aluno (opcional; habilita os campos de gestação p/ alunas).
+  garantirColuna(db, 'alunos', 'sexo', 'TEXT');
+
   // 2) Coluna de situação da conta ('ativo'/'pendente') para bancos antigos.
   garantirColuna(db, 'usuarios', 'status', "TEXT NOT NULL DEFAULT 'ativo'");
 
@@ -35,11 +38,23 @@ export function migrar(db) {
   garantirColuna(db, 'saude_aluno', 'medicamentos', 'TEXT');
   garantirColuna(db, 'saude_aluno', 'receita', 'TEXT');
 
+  // 2b2i) Eixo Saúde: medidas antropométricas + gestação (alunas).
+  garantirColuna(db, 'saude_aluno', 'peso', 'REAL');
+  garantirColuna(db, 'saude_aluno', 'altura', 'REAL');
+  garantirColuna(db, 'saude_aluno', 'gravidez', 'INTEGER NOT NULL DEFAULT 0');
+  garantirColuna(db, 'saude_aluno', 'gravidez_historico', 'INTEGER NOT NULL DEFAULT 0');
+
   // 2b3) Eixo Vida Escolar: aluno PcD + condição + anexo do PEI (Plano
   //      Educacional Individualizado).
   garantirColuna(db, 'vida_escolar_aluno', 'pcd', 'INTEGER NOT NULL DEFAULT 0');
   garantirColuna(db, 'vida_escolar_aluno', 'pcd_condicao', 'TEXT');
   garantirColuna(db, 'vida_escolar_aluno', 'pei', 'TEXT');
+
+  // 2b4) Eixo Infraestrutura: bairro do município (para filtrar os alertas).
+  //      O índice é criado aqui (não no schema.sql) porque em bancos antigos a
+  //      coluna só passa a existir após o ALTER acima.
+  garantirColuna(db, 'alertas_infra', 'bairro', 'TEXT');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_infra_bairro ON alertas_infra (bairro)');
 
   // 2c) Verificação de e-mail + dados de vínculo (equipe/gestão). O DEFAULT 1
   //     em email_verificado marca as contas já existentes como verificadas

@@ -23,10 +23,12 @@ const upsertSaude = db.prepare(`
   INSERT INTO saude_aluno
     (aluno_id, vacinacao_status, vacinas, alergias,
      vacinas_tomadas, doencas, doencas_outros, usa_medicamento_controlado, medicamentos,
+     peso, altura, gravidez, gravidez_historico,
      atualizado_em)
   VALUES
     (@aluno_id, @vacinacao_status, @vacinas, @alergias,
      @vacinas_tomadas, @doencas, @doencas_outros, @usa_medicamento_controlado, @medicamentos,
+     @peso, @altura, @gravidez, @gravidez_historico,
      datetime('now'))
   ON CONFLICT(aluno_id) DO UPDATE SET
     vacinacao_status = excluded.vacinacao_status,
@@ -37,6 +39,10 @@ const upsertSaude = db.prepare(`
     doencas_outros = excluded.doencas_outros,
     usa_medicamento_controlado = excluded.usa_medicamento_controlado,
     medicamentos = excluded.medicamentos,
+    peso = excluded.peso,
+    altura = excluded.altura,
+    gravidez = excluded.gravidez,
+    gravidez_historico = excluded.gravidez_historico,
     atualizado_em = datetime('now')
 `);
 
@@ -80,6 +86,14 @@ function tokens(csv) {
     .split(/[,;]+/)
     .map((t) => t.trim().toLowerCase())
     .filter(Boolean);
+}
+
+// Converte um valor numérico (peso/altura) para número positivo ou null.
+// Aceita vírgula decimal (ex.: "1,62" → 1.62). Zero/negativo/inválido → null.
+function numeroPositivoOuNulo(v) {
+  if (v === '' || v == null) return null;
+  const n = Number(String(v).replace(',', '.'));
+  return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 // Normaliza uma seleção de checklist (array ou CSV) mantendo só os valores
@@ -140,6 +154,10 @@ router.get('/:alunoId', (req, res) => {
     usa_medicamento_controlado: 0,
     medicamentos: null,
     receita: null,
+    peso: null,
+    altura: null,
+    gravidez: 0,
+    gravidez_historico: 0,
   };
   saude.sintomas = listarSintomas.all(aluno.id);
   res.json(saude);
@@ -155,6 +173,8 @@ router.put('/:alunoId', (req, res) => {
     return res.status(400).json({ erro: `Status de vacinação inválido. Use: ${VACINACAO_STATUS.join(', ')}.` });
   }
   const usaMedicamento = req.body.usa_medicamento_controlado ? 1 : 0;
+  // Gestação só se aplica a alunas do sexo feminino — para os demais, zera.
+  const feminino = aluno.sexo === 'feminino';
   upsertSaude.run({
     aluno_id: aluno.id,
     vacinacao_status,
@@ -166,6 +186,10 @@ router.put('/:alunoId', (req, res) => {
     usa_medicamento_controlado: usaMedicamento,
     // Só faz sentido guardar quais medicamentos se o aluno usa algum.
     medicamentos: usaMedicamento ? (req.body.medicamentos || null) : null,
+    peso: numeroPositivoOuNulo(req.body.peso),
+    altura: numeroPositivoOuNulo(req.body.altura),
+    gravidez: feminino && req.body.gravidez ? 1 : 0,
+    gravidez_historico: feminino && req.body.gravidez_historico ? 1 : 0,
   });
   res.json(obterSaude.get(aluno.id));
 });

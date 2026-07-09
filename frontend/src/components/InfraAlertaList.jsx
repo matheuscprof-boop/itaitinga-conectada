@@ -33,6 +33,7 @@ export default function InfraAlertaList({ alertas, podeGerenciarStatus = false, 
             <p className="infra-card__descricao">{a.descricao}</p>
             <p className="infra-card__meta">
               {a.anonimo ? 'Anônimo' : a.autor_nome || '—'}
+              {a.bairro && <span> · 📍 {a.bairro}</span>}
               {a.latitude != null && a.longitude != null && (
                 <span> · {Number(a.latitude).toFixed(4)}, {Number(a.longitude).toFixed(4)}</span>
               )}

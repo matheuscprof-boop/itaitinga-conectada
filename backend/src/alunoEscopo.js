@@ -5,7 +5,7 @@
 import db from './db.js';
 import { podeAcessarAluno } from './escopo.js';
 
-const obterAluno = db.prepare('SELECT id, nome, turma, escola_id FROM alunos WHERE id = ?');
+const obterAluno = db.prepare('SELECT id, nome, turma, sexo, escola_id FROM alunos WHERE id = ?');
 
 export function alunoNoEscopo(req, id) {
   const aluno = obterAluno.get(id);

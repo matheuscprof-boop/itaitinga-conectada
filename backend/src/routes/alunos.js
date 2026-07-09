@@ -4,7 +4,7 @@
 import { Router } from 'express';
 import db from '../db.js';
 import { exigirPerfil } from '../auth.js';
-import { PERFIS_GESTAO } from '../constants.js';
+import { PERFIS_GESTAO, SEXOS } from '../constants.js';
 import { escolaEfetiva, ehMunicipal } from '../escopo.js';
 
 const router = Router();
@@ -23,9 +23,9 @@ const alertasDoAluno = db.prepare(
 const escolaExiste = db.prepare('SELECT 1 FROM escolas WHERE id = ?');
 
 const inserir = db.prepare(`
-  INSERT INTO alunos (escola_id, nome, matricula, turma, data_nascimento,
+  INSERT INTO alunos (escola_id, nome, matricula, turma, sexo, data_nascimento,
                       responsavel_nome, responsavel_contato, observacoes)
-  VALUES (@escola_id, @nome, @matricula, @turma, @data_nascimento,
+  VALUES (@escola_id, @nome, @matricula, @turma, @sexo, @data_nascimento,
           @responsavel_nome, @responsavel_contato, @observacoes)
 `);
 
@@ -35,6 +35,7 @@ const atualizar = db.prepare(`
     nome = @nome,
     matricula = @matricula,
     turma = @turma,
+    sexo = @sexo,
     data_nascimento = @data_nascimento,
     responsavel_nome = @responsavel_nome,
     responsavel_contato = @responsavel_contato,
@@ -46,10 +47,13 @@ const atualizar = db.prepare(`
 const remover = db.prepare('DELETE FROM alunos WHERE id = ?');
 
 function normalizarAluno(body) {
+  // Sexo é opcional; só aceita os valores conhecidos (senão fica nulo).
+  const sexo = SEXOS.includes(body.sexo) ? body.sexo : null;
   return {
     nome: (body.nome ?? '').trim(),
     matricula: (body.matricula ?? '').trim(),
     turma: (body.turma ?? '').trim(),
+    sexo,
     data_nascimento: body.data_nascimento || null,
     responsavel_nome: body.responsavel_nome || null,
     responsavel_contato: body.responsavel_contato || null,

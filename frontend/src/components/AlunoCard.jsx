@@ -1,4 +1,6 @@
 // Cartão de informações do aluno (visão de leitura, usado na tela de detalhe).
+import { ROTULOS } from '../api.js';
+
 export default function AlunoCard({ aluno, podeGerenciar, onEditar, onRemover }) {
   // Formata a data ISO (AAAA-MM-DD) para o padrão brasileiro.
   const nascimento = aluno.data_nascimento
@@ -30,6 +32,12 @@ export default function AlunoCard({ aluno, podeGerenciar, onEditar, onRemover })
           <dt>Turma</dt>
           <dd>{aluno.turma}</dd>
         </div>
+        {aluno.sexo && (
+          <div>
+            <dt>Sexo</dt>
+            <dd>{ROTULOS.sexo[aluno.sexo] || aluno.sexo}</dd>
+          </div>
+        )}
         <div>
           <dt>Nascimento</dt>
           <dd>{nascimento}</dd>

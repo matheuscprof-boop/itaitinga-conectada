@@ -1,7 +1,7 @@
 // Formulário do cidadão para registrar um alerta de infraestrutura.
 // Envia FormData (multipart) para suportar a foto opcional.
-import { useState } from 'react';
-import { ROTULOS, rotuloInfra } from '../api.js';
+import { useEffect, useState } from 'react';
+import { api, ROTULOS, rotuloInfra } from '../api.js';
 import { obterLocalizacao } from '../geo.js';
 import MapaLeaflet from './MapaLeaflet.jsx';
 
@@ -10,7 +10,14 @@ const CATEGORIAS = Object.keys(ROTULOS.categoriaInfra);
 export default function InfraAlertaForm({ onCriar }) {
   const [categoria, setCategoria] = useState('buraco');
   const [descricao, setDescricao] = useState('');
+  const [bairro, setBairro] = useState('');
+  const [bairrosSugeridos, setBairrosSugeridos] = useState([]);
   const [foto, setFoto] = useState(null);
+
+  // Carrega os bairros já usados (sugestões do campo de bairro).
+  useEffect(() => {
+    api.infraListarBairros().then(setBairrosSugeridos).catch(() => {});
+  }, []);
   const [previewFoto, setPreviewFoto] = useState(null);
   const [ponto, setPonto] = useState(null); // { lat, lng }
   const [anonimo, setAnonimo] = useState(false);
@@ -53,6 +60,7 @@ export default function InfraAlertaForm({ onCriar }) {
       const fd = new FormData();
       fd.append('categoria', categoria);
       fd.append('descricao', descricao.trim());
+      if (bairro.trim()) fd.append('bairro', bairro.trim());
       fd.append('anonimo', anonimo ? '1' : '0');
       if (ponto) {
         fd.append('latitude', String(ponto.lat));
@@ -63,6 +71,7 @@ export default function InfraAlertaForm({ onCriar }) {
       await onCriar(fd);
       setOk('Alerta registrado. Obrigado por contribuir com Itaitinga!');
       setDescricao('');
+      setBairro('');
       setFoto(null);
       setPreviewFoto(null);
       setPonto(null);
@@ -100,6 +109,23 @@ export default function InfraAlertaForm({ onCriar }) {
           onChange={(e) => setDescricao(e.target.value)}
           placeholder="Descreva o problema e o ponto de referência."
         />
+      </div>
+
+      <div className="campo">
+        <label htmlFor="bairro">Bairro (opcional)</label>
+        <input
+          id="bairro"
+          type="text"
+          list="lista-bairros"
+          value={bairro}
+          onChange={(e) => setBairro(e.target.value)}
+          placeholder="ex.: Centro, Gereraú…"
+        />
+        <datalist id="lista-bairros">
+          {bairrosSugeridos.map((b) => (
+            <option key={b} value={b} />
+          ))}
+        </datalist>
       </div>
 
       <div className="campo">

@@ -6,6 +6,7 @@ const VAZIO = {
   nome: '',
   matricula: '',
   turma: '',
+  sexo: '',
   escola_id: '',
   data_nascimento: '',
   responsavel_nome: '',
@@ -109,6 +110,20 @@ export default function AlunoForm({ aluno, escolas, onSalvar, onCancelar }) {
             </select>
           </div>
         )}
+
+        <div className="campo">
+          <label htmlFor="sexo">Sexo</label>
+          <select
+            id="sexo"
+            value={form.sexo || ''}
+            onChange={(e) => alterar('sexo', e.target.value)}
+          >
+            <option value="">Não informar</option>
+            <option value="feminino">Feminino</option>
+            <option value="masculino">Masculino</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
 
         <div className="campo">
           <label htmlFor="data_nascimento">Data de nascimento</label>

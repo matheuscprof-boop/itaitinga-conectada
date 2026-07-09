@@ -116,7 +116,7 @@ export default function AlunoDetalhe({ alunoId, perfil, onVoltar }) {
         </section>
       )}
 
-      {aba === 'saude' && <SaudeAluno alunoId={alunoId} podeEditar={podeEditarEixos} />}
+      {aba === 'saude' && <SaudeAluno alunoId={alunoId} sexo={aluno.sexo} podeEditar={podeEditarEixos} />}
       {aba === 'assistencia' && <AssistenciaAluno alunoId={alunoId} podeEditar={podeEditarEixos} />}
       {aba === 'vida' && <VidaEscolarAluno alunoId={alunoId} podeEditar={podeEditarEixos} />}
       {aba === 'documentos' && <DocumentosAluno alunoId={alunoId} podeGerenciar={gestor} />}

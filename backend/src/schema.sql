@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS alunos (
   nome                  TEXT    NOT NULL,
   matricula             TEXT    NOT NULL UNIQUE,   -- identificador escolar único
   turma                 TEXT    NOT NULL,          -- ex.: "9º A"
+  sexo                  TEXT    CHECK (sexo IN ('feminino', 'masculino', 'outro')),
   data_nascimento       TEXT,                      -- formato ISO: AAAA-MM-DD
   responsavel_nome      TEXT,
   responsavel_contato   TEXT,                      -- telefone ou e-mail
@@ -150,6 +151,11 @@ CREATE TABLE IF NOT EXISTS saude_aluno (
   usa_medicamento_controlado INTEGER NOT NULL DEFAULT 0,
   medicamentos             TEXT,             -- quais medicamentos controlados
   receita                  TEXT,             -- caminho do anexo (receita médica)
+  peso                     REAL,             -- peso em kg
+  altura                   REAL,             -- altura em metros (ex.: 1.62)
+  -- Gestação: só se aplica a alunas do sexo feminino (a UI e a API garantem isso).
+  gravidez                 INTEGER NOT NULL DEFAULT 0,  -- 0/1: gestante atualmente
+  gravidez_historico       INTEGER NOT NULL DEFAULT 0,  -- 0/1: histórico de gestação
   atualizado_em    TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
 );
@@ -250,6 +256,7 @@ CREATE TABLE IF NOT EXISTS alertas_infra (
                         CHECK (categoria IN ('iluminacao', 'buraco', 'lixo', 'saneamento', 'alagamento', 'outro')),
   descricao     TEXT    NOT NULL,
   foto          TEXT,                          -- caminho relativo em /uploads (opcional)
+  bairro        TEXT,                          -- bairro do município (para filtrar)
   latitude      REAL,
   longitude     REAL,
   anonimo       INTEGER NOT NULL DEFAULT 0,    -- 0/1
@@ -268,6 +275,8 @@ CREATE INDEX IF NOT EXISTS idx_logbook_aluno    ON logbook_fotos (aluno_id);
 CREATE INDEX IF NOT EXISTS idx_documentos_aluno ON aluno_documentos (aluno_id);
 CREATE INDEX IF NOT EXISTS idx_infra_categoria  ON alertas_infra (categoria);
 CREATE INDEX IF NOT EXISTS idx_infra_status     ON alertas_infra (status);
+-- O índice de bairro é criado na migração (após garantir a coluna), pois em
+-- bancos antigos a coluna `bairro` ainda não existe quando este schema roda.
 CREATE INDEX IF NOT EXISTS idx_alunos_escola    ON alunos (escola_id);
 CREATE INDEX IF NOT EXISTS idx_alertas_aluno    ON alertas (aluno_id);
 CREATE INDEX IF NOT EXISTS idx_alertas_eixo     ON alertas (eixo);

@@ -21,7 +21,8 @@ function escaparHtml(s) {
 
 export default function PortalCidadao({ usuario = null, onEntrar, onCadastrar }) {
   const [alertas, setAlertas] = useState([]);
-  const [filtros, setFiltros] = useState({ categoria: '', status: '' });
+  const [filtros, setFiltros] = useState({ categoria: '', status: '', bairro: '' });
+  const [bairros, setBairros] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
@@ -40,6 +41,12 @@ export default function PortalCidadao({ usuario = null, onEntrar, onCadastrar })
   useEffect(() => {
     carregar();
   }, [carregar]);
+
+  // Carrega a lista de bairros (para o filtro). Recarrega quando a lista de
+  // alertas muda, pois um novo alerta pode introduzir um bairro inédito.
+  useEffect(() => {
+    api.infraListarBairros().then(setBairros).catch(() => {});
+  }, [alertas]);
 
   const marcadores = useMemo(
     () =>
@@ -132,6 +139,18 @@ export default function PortalCidadao({ usuario = null, onEntrar, onCadastrar })
             <option value="">Todos</option>
             {STATUS.map((s) => (
               <option key={s} value={s}>{ROTULOS.status[s]}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Bairro
+          <select
+            value={filtros.bairro}
+            onChange={(e) => setFiltros((f) => ({ ...f, bairro: e.target.value }))}
+          >
+            <option value="">Todos</option>
+            {bairros.map((b) => (
+              <option key={b} value={b}>{b}</option>
             ))}
           </select>
         </label>

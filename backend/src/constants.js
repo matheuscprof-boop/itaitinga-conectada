@@ -6,6 +6,15 @@ export const NIVEIS = ['baixo', 'medio', 'alto'];
 export const STATUS = ['aberto', 'em_andamento', 'resolvido'];
 export const PERFIS = ['professor', 'coordenacao', 'direcao', 'secretaria', 'secretaria_escolar', 'cidadao'];
 
+// Sexo do aluno (opcional). Usado para exibir campos específicos — ex.: a marcação
+// de gravidez/histórico gestacional só aparece para alunas do sexo feminino.
+export const SEXOS = ['feminino', 'masculino', 'outro'];
+export const SEXOS_LABEL = {
+  feminino: 'Feminino',
+  masculino: 'Masculino',
+  outro: 'Outro',
+};
+
 // Rótulos legíveis (usados também como referência pelo frontend).
 export const EIXOS_LABEL = {
   frequencia: 'Frequência',

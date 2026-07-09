@@ -29,7 +29,7 @@ import geoRouter from './routes/geo.js';
 import {
   EIXOS_LABEL, PERFIS_LABEL, NIVEIS, STATUS, PERFIS_GESTAO,
   CATEGORIAS_INFRA_LABEL, STATUS_INFRA, VACINACAO_STATUS, PERFIL_CIDADAO,
-  CATEGORIAS_DOCUMENTO_LABEL, VACINAS_LABEL, DOENCAS_PREEXISTENTES_LABEL,
+  CATEGORIAS_DOCUMENTO_LABEL, VACINAS_LABEL, DOENCAS_PREEXISTENTES_LABEL, SEXOS_LABEL,
 } from './constants.js';
 
 garantirAdminPadrao(); // cria o admin padrão se não houver usuários
@@ -63,6 +63,7 @@ app.get('/api/referencias', (_req, res) => {
     categorias_documento: CATEGORIAS_DOCUMENTO_LABEL,
     vacinas: VACINAS_LABEL,
     doencas: DOENCAS_PREEXISTENTES_LABEL,
+    sexos: SEXOS_LABEL,
   });
 });
 
