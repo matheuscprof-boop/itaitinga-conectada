@@ -211,6 +211,30 @@ test('Eixo A: peso/altura salvam; gestação só vale para alunas', async () => 
   assert.equal(put2.dados.pre_natal, 0);
 });
 
+test('Saúde: mapeamento municipal lista as gestantes do escopo', async () => {
+  const bia = await api('/api/alunos', {
+    token: estado.adminToken,
+    method: 'POST',
+    body: { nome: 'Bia', matricula: 'MBia', turma: '9B', sexo: 'feminino', escola_id: estado.escolaId },
+  });
+  assert.equal(bia.status, 201);
+  await api(`/api/saude/${bia.dados.id}`, {
+    token: estado.adminToken,
+    method: 'PUT',
+    body: { vacinacao_status: 'pendente', gravidez: 1, pre_natal: 0 },
+  });
+
+  const lista = await api('/api/saude/gestantes', { token: estado.adminToken });
+  assert.equal(lista.status, 200);
+  const alvo = lista.dados.find((r) => r.id === bia.dados.id);
+  assert.ok(alvo, 'a gestante deve aparecer no mapeamento');
+  assert.equal(alvo.gravidez, 1);
+  assert.equal(alvo.pre_natal, 0);
+  assert.equal(alvo.escola_nome, 'Escola A');
+  // Um aluno não-gestante não aparece na lista.
+  assert.ok(!lista.dados.some((r) => r.id === estado.alunos[1]));
+});
+
 test('Eixo B: geolocalização em área de risco é sinalizada e notificada', async () => {
   db.prepare("INSERT INTO areas_risco (nome, latitude, longitude, raio_km) VALUES ('Centro', -3.97, -38.52, 2)").run();
   const r = await api(`/api/assistencia/${estado.alunos[0]}`, {

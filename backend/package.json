@@ -12,6 +12,7 @@
     "seed:alunos": "node src/seed-alunos-ficticios.js",
     "seed:alertas": "node src/seed-alertas-ficticios.js",
     "seed:datas": "node src/redistribuir-datas-alertas.js",
+    "seed:gestacao": "node src/seed-gestacao.js",
     "test": "node --test"
   },
   "dependencies": {

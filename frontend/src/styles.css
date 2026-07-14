@@ -666,6 +666,23 @@ body {
 }
 .mapa-legenda li { display: flex; align-items: center; gap: 0.4rem; }
 
+/* ---- Panorama de Saúde (mapeamento de gestantes) ---- */
+.area-relatorio > .subtitulo { color: var(--cor-texto-suave); margin: 0 0 0.75rem; }
+.resumo-cards {
+  display: grid; gap: 1rem; margin: 1rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+}
+.cartao-resumo {
+  background: var(--cor-superficie); border: 1px solid var(--cor-borda);
+  border-left: 5px solid #c6d2e6; border-radius: 10px; padding: 1rem 1.2rem;
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.cartao-resumo strong { font-size: 2rem; line-height: 1; color: var(--cor-texto); }
+.cartao-resumo span { color: var(--cor-texto-suave); font-size: 0.9rem; }
+.cartao-resumo--info { border-left-color: var(--cor-primaria); }
+.cartao-resumo--alerta { border-left-color: var(--cor-perigo); }
+.linha-alerta { background: #fbecec; }
+
 /* ---- Impressão (Relatórios → PDF) ---- */
 @media print {
   .cabecalho-app,

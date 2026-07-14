@@ -16,6 +16,7 @@ import AlunoDetalhe from './pages/AlunoDetalhe.jsx';
 import Relatorios from './pages/Relatorios.jsx';
 import Analitico from './pages/Analitico.jsx';
 import Mapa from './pages/Mapa.jsx';
+import PanoramaSaude from './pages/PanoramaSaude.jsx';
 import Escolas from './pages/Escolas.jsx';
 import Usuarios from './pages/Usuarios.jsx';
 import MinhaConta from './pages/MinhaConta.jsx';
@@ -172,6 +173,14 @@ export default function App() {
                 >
                   Mapa
                 </button>
+                {gestao && (
+                  <button
+                    className={`nav-item ${view.tela === 'saude' ? 'nav-item--ativo' : ''}`}
+                    onClick={() => setView({ tela: 'saude' })}
+                  >
+                    Saúde
+                  </button>
+                )}
                 <button
                   className={`nav-item ${view.tela === 'infraestrutura' ? 'nav-item--ativo' : ''}`}
                   onClick={() => setView({ tela: 'infraestrutura' })}
@@ -241,6 +250,7 @@ export default function App() {
         {!cidadao && view.tela === 'relatorios' && <Relatorios perfil={usuario.perfil} />}
         {!cidadao && view.tela === 'analitico' && <Analitico perfil={usuario.perfil} />}
         {!cidadao && view.tela === 'mapa' && <Mapa />}
+        {!cidadao && view.tela === 'saude' && gestao && <PanoramaSaude />}
         {!cidadao && view.tela === 'escolas' && usuario.perfil === 'secretaria' && <Escolas />}
         {!cidadao && view.tela === 'usuarios' && (usuario.perfil === 'direcao' || usuario.perfil === 'secretaria') && (
           <Usuarios usuarioAtualId={usuario.id} perfil={usuario.perfil} />

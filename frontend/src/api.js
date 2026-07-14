@@ -147,6 +147,8 @@ export const api = {
   removerAlerta: (id) => requisicao(`/alertas/${id}`, { method: 'DELETE' }),
 
   // --- Eixo A: Saúde ---
+  // Mapeamento municipal das estudantes gestantes (+ histórico de gestação).
+  listarGestantes: () => requisicao('/saude/gestantes'),
   obterSaude: (alunoId) => requisicao(`/saude/${alunoId}`),
   salvarSaude: (alunoId, dados) =>
     requisicao(`/saude/${alunoId}`, { method: 'PUT', body: JSON.stringify(dados) }),

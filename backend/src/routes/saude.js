@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import db from '../db.js';
 import { VACINACAO_STATUS, VACINAS, DOENCAS_PREEXISTENTES, LIMITE_SINTOMAS } from '../constants.js';
 import { alunoNoEscopo } from '../alunoEscopo.js';
+import { escolaEfetiva } from '../escopo.js';
 import { notificar } from '../notificador.js';
 import { uploadDocumento, caminhoPublico, UPLOADS_DIR } from '../uploads.js';
 
@@ -137,6 +138,33 @@ function verificarSurto(aluno, novosSintomas) {
   }
   return null;
 }
+
+// GET /api/saude/gestantes → mapeamento municipal das estudantes gestantes e
+// com histórico de gestação (escopado por escola para perfis não-municipais).
+// Precisa vir ANTES de '/:alunoId' (senão "gestantes" seria lido como um id).
+router.get('/gestantes', (req, res) => {
+  const escola = escolaEfetiva(req);
+  const cond = ['(s.gravidez = 1 OR s.gravidez_historico = 1)'];
+  const params = {};
+  if (escola != null) {
+    cond.push('a.escola_id = @escola');
+    params.escola = escola;
+  }
+  const sql = `
+    SELECT a.id, a.nome, a.matricula, a.turma, a.data_nascimento, a.sexo,
+           a.escola_id, e.nome AS escola_nome,
+           a.responsavel_nome, a.responsavel_contato,
+           s.gravidez, s.gravidez_historico, s.pre_natal,
+           ass.latitude, ass.longitude, ass.endereco
+    FROM alunos a
+    JOIN saude_aluno s ON s.aluno_id = a.id
+    LEFT JOIN escolas e ON e.id = a.escola_id
+    LEFT JOIN assistencia_aluno ass ON ass.aluno_id = a.id
+    WHERE ${cond.join(' AND ')}
+    ORDER BY s.gravidez DESC, e.nome COLLATE NOCASE, a.nome COLLATE NOCASE
+  `;
+  res.json(db.prepare(sql).all(params));
+});
 
 // GET /api/saude/:alunoId → dados de saúde + sintomas recentes
 router.get('/:alunoId', (req, res) => {
