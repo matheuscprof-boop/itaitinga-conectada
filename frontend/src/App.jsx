@@ -18,6 +18,7 @@ import Analitico from './pages/Analitico.jsx';
 import Mapa from './pages/Mapa.jsx';
 import PanoramaSaude from './pages/PanoramaSaude.jsx';
 import Escolas from './pages/Escolas.jsx';
+import MenuSuspenso from './components/MenuSuspenso.jsx';
 import Usuarios from './pages/Usuarios.jsx';
 import MinhaConta from './pages/MinhaConta.jsx';
 import Notificacoes from './pages/Notificacoes.jsx';
@@ -155,24 +156,23 @@ export default function App() {
                 >
                   Início
                 </button>
-                <button
-                  className={`nav-item ${view.tela === 'relatorios' ? 'nav-item--ativo' : ''}`}
-                  onClick={() => setView({ tela: 'relatorios' })}
+
+                {/* Grupo "Análises": relatórios, painel analítico e mapa. */}
+                <MenuSuspenso
+                  rotulo="Análises"
+                  ativo={['relatorios', 'analitico', 'mapa'].includes(view.tela)}
                 >
-                  Relatórios
-                </button>
-                <button
-                  className={`nav-item ${view.tela === 'analitico' ? 'nav-item--ativo' : ''}`}
-                  onClick={() => setView({ tela: 'analitico' })}
-                >
-                  Análises
-                </button>
-                <button
-                  className={`nav-item ${view.tela === 'mapa' ? 'nav-item--ativo' : ''}`}
-                  onClick={() => setView({ tela: 'mapa' })}
-                >
-                  Mapa
-                </button>
+                  <button className="menu-suspenso__item" onClick={() => setView({ tela: 'relatorios' })}>
+                    Relatórios
+                  </button>
+                  <button className="menu-suspenso__item" onClick={() => setView({ tela: 'analitico' })}>
+                    Painel analítico
+                  </button>
+                  <button className="menu-suspenso__item" onClick={() => setView({ tela: 'mapa' })}>
+                    Mapa das escolas
+                  </button>
+                </MenuSuspenso>
+
                 {gestao && (
                   <button
                     className={`nav-item ${view.tela === 'saude' ? 'nav-item--ativo' : ''}`}
@@ -196,21 +196,22 @@ export default function App() {
                     {naoLidas > 0 && <span className="contador-nav" aria-label={`${naoLidas} não lidas`}>{naoLidas}</span>}
                   </button>
                 )}
-                {usuario.perfil === 'secretaria' && (
-                  <button
-                    className={`nav-item ${view.tela === 'escolas' ? 'nav-item--ativo' : ''}`}
-                    onClick={() => setView({ tela: 'escolas' })}
+
+                {/* Grupo "Gestão": cadastros administrativos (escolas e usuários). */}
+                {(usuario.perfil === 'secretaria' || usuario.perfil === 'direcao') && (
+                  <MenuSuspenso
+                    rotulo="Gestão"
+                    ativo={['escolas', 'usuarios'].includes(view.tela)}
                   >
-                    Escolas
-                  </button>
-                )}
-                {(usuario.perfil === 'direcao' || usuario.perfil === 'secretaria') && (
-                  <button
-                    className={`nav-item ${view.tela === 'usuarios' ? 'nav-item--ativo' : ''}`}
-                    onClick={() => setView({ tela: 'usuarios' })}
-                  >
-                    Usuários
-                  </button>
+                    {usuario.perfil === 'secretaria' && (
+                      <button className="menu-suspenso__item" onClick={() => setView({ tela: 'escolas' })}>
+                        Escolas
+                      </button>
+                    )}
+                    <button className="menu-suspenso__item" onClick={() => setView({ tela: 'usuarios' })}>
+                      Usuários
+                    </button>
+                  </MenuSuspenso>
                 )}
               </>
             )}

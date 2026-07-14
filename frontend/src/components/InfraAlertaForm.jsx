@@ -145,22 +145,9 @@ export default function InfraAlertaForm({ onCriar }) {
         <div aria-labelledby="rotulo-local">
           <MapaLeaflet modoPicker onEscolher={definirPonto} pontoSelecionado={ponto} altura={280} />
         </div>
-        <div className="infra-form__coords">
-          <label>
-            Latitude
-            <input
-              type="number" step="any" value={ponto?.lat ?? ''}
-              onChange={(e) => setPonto((p) => ({ lat: Number(e.target.value), lng: p?.lng ?? 0 }))}
-            />
-          </label>
-          <label>
-            Longitude
-            <input
-              type="number" step="any" value={ponto?.lng ?? ''}
-              onChange={(e) => setPonto((p) => ({ lat: p?.lat ?? 0, lng: Number(e.target.value) }))}
-            />
-          </label>
-        </div>
+        <p className="local-status" aria-live="polite">
+          {ponto ? '📍 Local marcado no mapa.' : 'Nenhum local marcado (opcional).'}
+        </p>
       </div>
 
       <label className="campo-checkbox">

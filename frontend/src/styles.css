@@ -5,16 +5,22 @@
    ===================================================================== */
 
 :root {
-  --cor-fundo: #f4f6f9;
+  --cor-fundo: #eef2f7;
   --cor-superficie: #ffffff;
-  --cor-borda: #d5dbe3;
-  --cor-texto: #1c2530;
-  --cor-texto-suave: #55606e;
-  --cor-primaria: #1f5fbf;
-  --cor-primaria-escura: #17458c;
-  --cor-perigo: #b3261e;
-  --raio: 10px;
-  --sombra: 0 1px 3px rgba(20, 30, 45, 0.08), 0 1px 2px rgba(20, 30, 45, 0.06);
+  --cor-borda: #e2e8f0;
+  --cor-borda-forte: #cbd5e1;
+  --cor-texto: #172033;
+  --cor-texto-suave: #5b6675;
+  --cor-primaria: #2563c9;
+  --cor-primaria-escura: #16409a;
+  --cor-primaria-clara: #eaf1fc;
+  --cor-acento: #0e9384;      /* teal — destaques/positivo */
+  --cor-perigo: #c22a20;
+  --cor-perigo-clara: #fbecec;
+  --raio: 12px;
+  --raio-pequeno: 8px;
+  --sombra: 0 1px 2px rgba(23, 32, 51, 0.05), 0 4px 12px rgba(23, 32, 51, 0.06);
+  --sombra-forte: 0 8px 28px rgba(23, 32, 51, 0.14);
   --fonte: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -52,13 +58,14 @@ body {
 
 /* ---- Cabeçalho e rodapé ---- */
 .cabecalho-app {
-  background: var(--cor-primaria-escura);
+  background: linear-gradient(120deg, var(--cor-primaria-escura), var(--cor-primaria));
   color: #fff;
+  box-shadow: 0 2px 10px rgba(23, 32, 51, 0.12);
 }
 .cabecalho-conteudo {
-  max-width: 960px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 1rem 1.25rem;
+  padding: 0.85rem 1.25rem;
   display: flex;
   align-items: center;
   gap: 0.5rem 0.75rem;
@@ -77,13 +84,13 @@ body {
 .subtitulo { margin: 0; color: #cddcf3; font-size: 0.95rem; }
 
 .conteudo {
-  max-width: 960px;
-  margin: 1.5rem auto;
+  max-width: 1080px;
+  margin: 1.75rem auto;
   padding: 0 1.25rem;
 }
 
 .rodape-app {
-  max-width: 960px;
+  max-width: 1080px;
   margin: 2rem auto;
   padding: 1rem 1.25rem;
   color: var(--cor-texto-suave);
@@ -97,9 +104,10 @@ body {
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
   box-shadow: var(--sombra);
-  padding: 1.25rem;
+  padding: 1.35rem 1.5rem;
   margin-bottom: 1.25rem;
 }
+.card h3 { margin-top: 0; }
 
 .secao-cabecalho {
   display: flex;
@@ -146,14 +154,22 @@ body {
 .campo textarea {
   font: inherit;
   padding: 0.55rem 0.7rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: 6px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pequeno);
   background: #fff;
   color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   /* Permite que controles com largura intrínseca (file, number, select)
      encolham em telas estreitas em vez de estourar as bordas. */
   min-width: 0;
   max-width: 100%;
+}
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 3px rgba(37, 99, 201, 0.15);
 }
 .campo textarea { resize: vertical; }
 .campo--busca { max-width: 480px; }
@@ -207,24 +223,59 @@ body {
   font: inherit;
   font-weight: 600;
   padding: 0.55rem 1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: 6px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pequeno);
   background: #fff;
   color: var(--cor-texto);
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
 }
-.btn:hover { background: #eef1f6; }
-.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn:hover { background: #f1f5fb; border-color: var(--cor-primaria); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn:disabled:hover { background: #fff; border-color: var(--cor-borda-forte); }
 .btn--primario {
   background: var(--cor-primaria);
   border-color: var(--cor-primaria);
   color: #fff;
+  box-shadow: 0 1px 2px rgba(37, 99, 201, 0.3);
 }
-.btn--primario:hover { background: var(--cor-primaria-escura); }
+.btn--primario:hover { background: var(--cor-primaria-escura); border-color: var(--cor-primaria-escura); }
 .btn--perigo { color: var(--cor-perigo); border-color: #e5b4b1; }
-.btn--perigo:hover { background: #fbecec; }
+.btn--perigo:hover { background: var(--cor-perigo-clara); border-color: var(--cor-perigo); }
 .btn--pequeno { padding: 0.35rem 0.7rem; font-size: 0.85rem; }
 .btn--voltar { margin-bottom: 1rem; }
+
+/* ---- Menu suspenso (dropdown do cabeçalho) ---- */
+.menu-suspenso { position: relative; display: inline-block; }
+.menu-suspenso__seta { font-size: 0.7em; opacity: 0.85; }
+.menu-suspenso__lista {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 190px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  box-shadow: var(--sombra-forte);
+  padding: 0.35rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.menu-suspenso__item {
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--cor-texto);
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.menu-suspenso__item:hover { background: var(--cor-primaria-clara); color: var(--cor-primaria-escura); }
 
 /* ---- Listas ---- */
 .lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
@@ -567,18 +618,14 @@ body {
 /* Localização da residência (Assistência): endereço + GPS + mapa */
 .geo-residencia { border: 1px solid var(--cor-borda); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
 .geo-residencia legend { font-weight: 600; padding: 0 0.4rem; }
-.geo-endereco { display: flex; gap: 0.5rem; align-items: center; }
-.geo-endereco input { flex: 1; }
+.geo-endereco { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.geo-endereco input { flex: 1 1 200px; min-width: 0; }
 .ajuda { font-size: 0.85rem; color: var(--cor-texto-suave, #555); margin: 0.4rem 0 0; }
-.coords-leitura { font-size: 0.9rem; color: var(--cor-texto-suave, #555); margin: 0.5rem 0 0; }
+/* Status de localização (substitui a leitura de coordenadas cruas). */
+.local-status { font-size: 0.9rem; color: var(--cor-texto-suave, #555); margin: 0.5rem 0 0; }
 
 /* Formulário de alerta de infraestrutura */
 .infra-form__preview { max-width: 220px; border-radius: 8px; margin-top: 0.5rem; display: block; }
-.infra-form__coords { display: flex; gap: 1rem; margin-top: 0.5rem; flex-wrap: wrap; }
-/* flex:1 1 140px + min-width:0 deixa os campos numéricos encolherem em telas
-   estreitas (senão a largura intrínseca do input[type=number] estoura a tela). */
-.infra-form__coords label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; color: var(--cor-texto-suave); flex: 1 1 140px; min-width: 0; }
-.infra-form__coords input { width: 100%; min-width: 0; }
 .campo-checkbox { display: flex; align-items: center; gap: 0.5rem; margin: 0.75rem 0; }
 .campo-checkbox input { width: auto; }
 

@@ -77,7 +77,6 @@ export default function AssistenciaAluno({ alunoId, podeEditar = true }) {
 
   const ponto = dados.latitude != null && dados.longitude != null
     ? { lat: dados.latitude, lng: dados.longitude } : null;
-  const coord = (v) => (v == null || v === '' ? '—' : Number(v).toFixed(6));
 
   return (
     <div className="eixo-secao">
@@ -150,9 +149,8 @@ export default function AssistenciaAluno({ alunoId, podeEditar = true }) {
               marcadores={ponto ? [{ id: 1, latitude: ponto.lat, longitude: ponto.lng, emoji: '🏠', emojiLabel: 'Residência' }] : []}
               altura={260}
             />
-            <p className="coords-leitura" aria-live="polite">
-              Coordenadas: <strong>{coord(dados.latitude)}</strong>, <strong>{coord(dados.longitude)}</strong>
-              {ponto ? '' : ' — ainda não definidas'}
+            <p className="local-status" aria-live="polite">
+              {ponto ? '📍 Localização definida.' : 'Localização ainda não definida.'}
             </p>
           </div>
         </fieldset>

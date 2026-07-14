@@ -1,6 +1,8 @@
 // Gestão de escolas (acesso restrito à Secretaria Municipal).
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
+import { obterLocalizacao } from '../geo.js';
+import MapaLeaflet from '../components/MapaLeaflet.jsx';
 
 const FORM_VAZIO = { nome: '', municipio: '', endereco: '', latitude: '', longitude: '' };
 
@@ -11,8 +13,44 @@ export default function Escolas() {
   const [erro, setErro] = useState('');
   const [aviso, setAviso] = useState('');
   const [salvando, setSalvando] = useState(false);
+  const [buscando, setBuscando] = useState(false);
 
   const editando = editandoId !== null;
+
+  const ponto = form.latitude !== '' && form.longitude !== '' && form.latitude != null && form.longitude != null
+    ? { lat: Number(form.latitude), lng: Number(form.longitude) }
+    : null;
+
+  function definirPonto(lat, lng) {
+    setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
+  }
+
+  // Endereço → coordenadas (geocodificação no backend).
+  async function localizarEndereco() {
+    const endereco = (form.endereco || '').trim();
+    if (!endereco) { setErro('Digite o endereço da escola antes de localizar.'); return; }
+    setErro(''); setAviso(''); setBuscando(true);
+    try {
+      const r = await api.geocodificar(endereco);
+      setForm((f) => ({ ...f, latitude: r.latitude, longitude: r.longitude }));
+      setAviso(`Endereço localizado: ${r.endereco_encontrado}. Confira o ponto no mapa e salve.`);
+    } catch (e) {
+      setErro(e.message);
+    } finally {
+      setBuscando(false);
+    }
+  }
+
+  async function usarGps() {
+    setErro(''); setAviso('');
+    try {
+      const { lat, lng } = await obterLocalizacao();
+      setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
+      setAviso('Localização do dispositivo aplicada. Ajuste no mapa se necessário e salve.');
+    } catch (e) {
+      setErro(e.message);
+    }
+  }
 
   async function carregar() {
     try {
@@ -104,20 +142,38 @@ export default function Escolas() {
           </div>
           <div className="campo">
             <label htmlFor="e-endereco">Endereço</label>
-            <input id="e-endereco" type="text" value={form.endereco}
-              onChange={(e) => alterar('endereco', e.target.value)} />
-          </div>
-          <div className="campo">
-            <label htmlFor="e-lat">Latitude</label>
-            <input id="e-lat" type="number" step="any" placeholder="-23.55" value={form.latitude}
-              onChange={(e) => alterar('latitude', e.target.value)} />
-          </div>
-          <div className="campo">
-            <label htmlFor="e-lng">Longitude</label>
-            <input id="e-lng" type="number" step="any" placeholder="-46.63" value={form.longitude}
-              onChange={(e) => alterar('longitude', e.target.value)} />
+            <div className="geo-endereco">
+              <input id="e-endereco" type="text" value={form.endereco}
+                placeholder="Ex.: Av. Cruzeiro do Sul, 612 - Centro"
+                onChange={(e) => alterar('endereco', e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); localizarEndereco(); } }} />
+              <button type="button" className="btn btn--pequeno" onClick={localizarEndereco} disabled={buscando}>
+                {buscando ? 'Localizando…' : 'Localizar endereço'}
+              </button>
+            </div>
           </div>
         </div>
+
+        <fieldset className="campo geo-residencia">
+          <legend>Localização no mapa</legend>
+          <button type="button" className="btn btn--pequeno" onClick={usarGps}>
+            📍 Usar minha localização (GPS)
+          </button>
+          <div className="campo">
+            <label>Ponto no mapa (clique para ajustar)</label>
+            <MapaLeaflet
+              modoPicker
+              onEscolher={definirPonto}
+              pontoSelecionado={ponto}
+              marcadores={ponto ? [{ id: 1, latitude: ponto.lat, longitude: ponto.lng, emoji: '🏫', emojiLabel: 'Escola' }] : []}
+              altura={260}
+            />
+            <p className="local-status" aria-live="polite">
+              {ponto ? '📍 Localização definida.' : 'Localização ainda não definida (a escola não aparece no mapa).'}
+            </p>
+          </div>
+        </fieldset>
+
         <div className="form-acoes">
           <button type="submit" className="btn btn--primario" disabled={salvando}>
             {salvando ? 'Salvando…' : editando ? 'Salvar alterações' : 'Criar escola'}
@@ -141,8 +197,8 @@ export default function Escolas() {
                   <span className="lista-item-sub">
                     {e.municipio || 'Município não informado'}
                     {e.latitude != null && e.longitude != null
-                      ? ` · ${e.latitude}, ${e.longitude}`
-                      : ' · sem coordenadas'}
+                      ? ' · 📍 no mapa'
+                      : ' · sem localização'}
                   </span>
                 </div>
                 <div className="usuario-acoes">
