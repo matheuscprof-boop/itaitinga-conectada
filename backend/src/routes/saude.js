@@ -23,12 +23,12 @@ const upsertSaude = db.prepare(`
   INSERT INTO saude_aluno
     (aluno_id, vacinacao_status, vacinas, alergias,
      vacinas_tomadas, doencas, doencas_outros, usa_medicamento_controlado, medicamentos,
-     peso, altura, gravidez, gravidez_historico,
+     peso, altura, gravidez, gravidez_historico, pre_natal,
      atualizado_em)
   VALUES
     (@aluno_id, @vacinacao_status, @vacinas, @alergias,
      @vacinas_tomadas, @doencas, @doencas_outros, @usa_medicamento_controlado, @medicamentos,
-     @peso, @altura, @gravidez, @gravidez_historico,
+     @peso, @altura, @gravidez, @gravidez_historico, @pre_natal,
      datetime('now'))
   ON CONFLICT(aluno_id) DO UPDATE SET
     vacinacao_status = excluded.vacinacao_status,
@@ -43,6 +43,7 @@ const upsertSaude = db.prepare(`
     altura = excluded.altura,
     gravidez = excluded.gravidez,
     gravidez_historico = excluded.gravidez_historico,
+    pre_natal = excluded.pre_natal,
     atualizado_em = datetime('now')
 `);
 
@@ -158,6 +159,7 @@ router.get('/:alunoId', (req, res) => {
     altura: null,
     gravidez: 0,
     gravidez_historico: 0,
+    pre_natal: 0,
   };
   saude.sintomas = listarSintomas.all(aluno.id);
   res.json(saude);
@@ -175,6 +177,7 @@ router.put('/:alunoId', (req, res) => {
   const usaMedicamento = req.body.usa_medicamento_controlado ? 1 : 0;
   // Gestação só se aplica a alunas do sexo feminino — para os demais, zera.
   const feminino = aluno.sexo === 'feminino';
+  const gravida = feminino && req.body.gravidez ? 1 : 0;
   upsertSaude.run({
     aluno_id: aluno.id,
     vacinacao_status,
@@ -188,8 +191,10 @@ router.put('/:alunoId', (req, res) => {
     medicamentos: usaMedicamento ? (req.body.medicamentos || null) : null,
     peso: numeroPositivoOuNulo(req.body.peso),
     altura: numeroPositivoOuNulo(req.body.altura),
-    gravidez: feminino && req.body.gravidez ? 1 : 0,
+    gravidez: gravida,
     gravidez_historico: feminino && req.body.gravidez_historico ? 1 : 0,
+    // Pré-natal só faz sentido para gestante atual — fora disso, zera.
+    pre_natal: gravida && req.body.pre_natal ? 1 : 0,
   });
   res.json(obterSaude.get(aluno.id));
 });

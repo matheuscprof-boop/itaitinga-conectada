@@ -43,6 +43,7 @@ export function migrar(db) {
   garantirColuna(db, 'saude_aluno', 'altura', 'REAL');
   garantirColuna(db, 'saude_aluno', 'gravidez', 'INTEGER NOT NULL DEFAULT 0');
   garantirColuna(db, 'saude_aluno', 'gravidez_historico', 'INTEGER NOT NULL DEFAULT 0');
+  garantirColuna(db, 'saude_aluno', 'pre_natal', 'INTEGER NOT NULL DEFAULT 0');
 
   // 2b3) Eixo Vida Escolar: aluno PcD + condição + anexo do PEI (Plano
   //      Educacional Individualizado).

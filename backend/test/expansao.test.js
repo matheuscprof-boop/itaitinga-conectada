@@ -181,23 +181,34 @@ test('Eixo A: peso/altura salvam; gestação só vale para alunas', async () => 
   const put = await api(`/api/saude/${aluna.dados.id}`, {
     token: estado.adminToken,
     method: 'PUT',
-    body: { vacinacao_status: 'pendente', peso: '54,5', altura: 1.6, gravidez: 1, gravidez_historico: 1 },
+    body: { vacinacao_status: 'pendente', peso: '54,5', altura: 1.6, gravidez: 1, gravidez_historico: 1, pre_natal: 1 },
   });
   assert.equal(put.status, 200);
   assert.equal(put.dados.peso, 54.5);
   assert.equal(put.dados.altura, 1.6);
   assert.equal(put.dados.gravidez, 1);
   assert.equal(put.dados.gravidez_historico, 1);
+  assert.equal(put.dados.pre_natal, 1);
+
+  // Pré-natal só vale se gestante: desmarcar gravidez zera o pré-natal.
+  const put1b = await api(`/api/saude/${aluna.dados.id}`, {
+    token: estado.adminToken,
+    method: 'PUT',
+    body: { vacinacao_status: 'pendente', gravidez: 0, pre_natal: 1 },
+  });
+  assert.equal(put1b.dados.gravidez, 0);
+  assert.equal(put1b.dados.pre_natal, 0);
 
   // Aluno sem sexo feminino: peso/altura entram, mas gestação é forçada a 0.
   const put2 = await api(`/api/saude/${estado.alunos[1]}`, {
     token: estado.adminToken,
     method: 'PUT',
-    body: { vacinacao_status: 'pendente', peso: 70, altura: 1.75, gravidez: 1, gravidez_historico: 1 },
+    body: { vacinacao_status: 'pendente', peso: 70, altura: 1.75, gravidez: 1, gravidez_historico: 1, pre_natal: 1 },
   });
   assert.equal(put2.dados.peso, 70);
   assert.equal(put2.dados.gravidez, 0);
   assert.equal(put2.dados.gravidez_historico, 0);
+  assert.equal(put2.dados.pre_natal, 0);
 });
 
 test('Eixo B: geolocalização em área de risco é sinalizada e notificada', async () => {

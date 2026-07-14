@@ -44,6 +44,8 @@ export default function SaudeAluno({ alunoId, sexo = null, podeEditar = true }) 
         // Gestação: só enviada para alunas (o backend também garante isso).
         gravidez: feminino && dados.gravidez ? 1 : 0,
         gravidez_historico: feminino && dados.gravidez_historico ? 1 : 0,
+        // Pré-natal só faz sentido para gestante atual.
+        pre_natal: feminino && dados.gravidez && dados.pre_natal ? 1 : 0,
       });
       setOk('Dados de saúde salvos.');
     } catch (err) { setErro(err.message); }
@@ -207,9 +209,17 @@ export default function SaudeAluno({ alunoId, sexo = null, podeEditar = true }) 
             <label className="checklist-item">
               <input type="checkbox" disabled={!podeEditar}
                 checked={!!dados.gravidez}
-                onChange={(e) => setDados({ ...dados, gravidez: e.target.checked ? 1 : 0 })} />
+                onChange={(e) => setDados({ ...dados, gravidez: e.target.checked ? 1 : 0, pre_natal: e.target.checked ? dados.pre_natal : 0 })} />
               Está grávida atualmente
             </label>
+            {!!dados.gravidez && (
+              <label className="checklist-item" style={{ marginLeft: '1.5rem' }}>
+                <input type="checkbox" disabled={!podeEditar}
+                  checked={!!dados.pre_natal}
+                  onChange={(e) => setDados({ ...dados, pre_natal: e.target.checked ? 1 : 0 })} />
+                Faz acompanhamento pré-natal
+              </label>
+            )}
             <label className="checklist-item">
               <input type="checkbox" disabled={!podeEditar}
                 checked={!!dados.gravidez_historico}

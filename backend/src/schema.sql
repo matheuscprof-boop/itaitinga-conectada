@@ -156,6 +156,7 @@ CREATE TABLE IF NOT EXISTS saude_aluno (
   -- Gestação: só se aplica a alunas do sexo feminino (a UI e a API garantem isso).
   gravidez                 INTEGER NOT NULL DEFAULT 0,  -- 0/1: gestante atualmente
   gravidez_historico       INTEGER NOT NULL DEFAULT 0,  -- 0/1: histórico de gestação
+  pre_natal                INTEGER NOT NULL DEFAULT 0,  -- 0/1: faz acompanhamento pré-natal (se gestante)
   atualizado_em    TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
 );
