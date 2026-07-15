@@ -49,17 +49,25 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario]);
 
-  // Ao abrir a aplicação, valida o token guardado (se houver).
+  // Ao abrir a aplicação, valida o token guardado (se houver) e exibe a tela
+  // de carregamento (vídeo da marca) por um tempo mínimo para que a animação
+  // seja realmente vista — mesmo quando não há sessão a validar.
   useEffect(() => {
+    const MIN_SPLASH = 2200; // ms — duração mínima da tela de carregamento
+    const inicio = performance.now();
+    const finalizar = () => {
+      const resta = Math.max(0, MIN_SPLASH - (performance.now() - inicio));
+      window.setTimeout(() => setCarregando(false), resta);
+    };
     if (!getToken()) {
-      setCarregando(false);
+      finalizar();
       return;
     }
     api
       .eu()
       .then((u) => setUsuario(u))
       .catch(() => api.logout())
-      .finally(() => setCarregando(false));
+      .finally(finalizar);
   }, []);
 
   // Se qualquer chamada retornar 401, volta para a tela de login.
@@ -105,9 +113,9 @@ export default function App() {
 
   if (carregando) {
     return (
-      <div className="tela-carregando" role="status" aria-label="Carregando">
+      <div className="tela-carregando" role="status" aria-label="Carregando Itaitinga Conectada">
         <video src="/marca/tela-carregamento.mp4" autoPlay muted loop playsInline aria-hidden="true" />
-        <p>Carregando…</p>
+        <p className="sr-only">Carregando…</p>
       </div>
     );
   }

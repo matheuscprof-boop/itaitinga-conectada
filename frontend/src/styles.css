@@ -587,15 +587,14 @@ body {
 .tela-carregando {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
   background: var(--grad-marca);
-  color: #fff;
+  overflow: hidden;
 }
-.tela-carregando video { width: min(320px, 72vw); height: auto; }
-.tela-carregando p { margin: 0; font-weight: 600; letter-spacing: 0.5px; }
+/* contain mostra a tela de carregamento inteira (sem cortar) sobre o
+   gradiente da marca, em qualquer proporção de tela. */
+.tela-carregando video { width: 100vw; height: 100vh; object-fit: contain; }
 
 /* ---- Tela de login em dois painéis (arte com vídeo + formulário) ---- */
 .tela-login {
