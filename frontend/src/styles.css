@@ -596,39 +596,38 @@ body {
 .tela-carregando video { width: min(320px, 72vw); height: auto; }
 .tela-carregando p { margin: 0; font-weight: 600; letter-spacing: 0.5px; }
 
-/* ---- Tela de login em dois painéis (arte com vídeo + formulário) ---- */
+/* ---- Tela de login: fundo full-bleed (vídeo/gradiente contínuo em toda a
+   largura) com o cartão do formulário flutuando por cima, à direita. ---- */
 .tela-login {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-}
-.login-arte {
   position: relative;
+  min-height: 100vh;
   overflow: hidden;
-  display: flex;
   background: var(--grad-marca);
-  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
+/* Camada de fundo: ocupa a tela toda — as barras do gradiente e a faixa branca
+   do vídeo seguem por baixo do cartão, criando a continuidade. */
+.login-arte { position: absolute; inset: 0; overflow: hidden; color: #fff; }
 .login-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  /* contain mostra o quadro inteiro do vídeo (sem cortar as laterais). */
+  /* contain mostra o quadro inteiro do vídeo, agora na largura toda. */
   object-fit: contain;
 }
-/* Conteúdo por cima do vídeo: logo (plaquinha) no topo, slogan na base.
-   O scrim escurece só topo e base para legibilidade, deixando o vídeo à mostra. */
+/* Logo (plaquinha) no topo e slogan na base, sobre o fundo. */
 .login-arte__conteudo {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 1;
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 2rem;
-  background: linear-gradient(180deg, rgba(5, 46, 89, 0.45) 0%, rgba(5, 46, 89, 0) 22%, rgba(5, 46, 89, 0) 58%, rgba(5, 46, 89, 0.9) 100%);
+  padding: 2.25rem;
+  pointer-events: none;
 }
 .login-arte__logo {
   align-self: flex-start;
@@ -647,14 +646,14 @@ body {
   text-shadow: 0 1px 6px rgba(5, 46, 89, 0.85);
 }
 
+/* Cartão do formulário: flutua por cima do fundo, à direita. */
 .login-form-lado {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  z-index: 2;
   padding: 1.5rem;
-  background: var(--cor-fundo);
+  margin-right: clamp(1rem, 6vw, 5rem);
 }
-.form-login { width: 100%; max-width: 380px; margin: 0; }
+.form-login { width: 100%; max-width: 380px; margin: 0; box-shadow: var(--sombra-forte); }
 .form-login h1 { margin: 0 0 0.25rem; }
 .subtitulo-login { margin: 0 0 1.25rem; color: var(--cor-texto-suave); font-size: 0.9rem; }
 .form-login .btn { width: 100%; margin-top: 0.5rem; }
@@ -669,11 +668,11 @@ body {
 
 /* No celular, o painel de arte vira uma faixa curta no topo. */
 @media (max-width: 760px) {
-  .tela-login { grid-template-columns: 1fr; grid-template-rows: 180px auto; }
-  .login-arte__conteudo { padding: 1rem 1.25rem; justify-content: flex-start; }
-  .login-arte__logo { padding: 0.5rem 0.75rem; }
-  .login-arte__logo img { height: 36px; }
-  .login-arte__slogan { display: none; }
+  .tela-login { justify-content: center; padding: 1.5rem 1rem; }
+  .login-form-lado { margin-right: 0; width: 100%; max-width: 420px; }
+  /* No celular o cartão ocupa quase toda a largura; a logo/slogan de fundo
+     ficariam escondidas atrás dele, então mostramos só o fundo do vídeo. */
+  .login-arte__conteudo { display: none; }
 }
 
 /* ---- Linha do tempo (histórico do alerta) ---- */
