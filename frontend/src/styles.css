@@ -487,24 +487,30 @@ body {
   background: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
-  padding: 0.85rem 1rem;
+  padding: 0.9rem 1.05rem;
   cursor: pointer;
   font: inherit;
   color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.16s ease, transform 0.12s ease;
 }
-.lista-item-botao:hover { border-color: var(--cor-primaria); background: #f7f9fc; }
+.lista-item-botao:hover { border-color: var(--cor-primaria); background: #f7fafe; box-shadow: var(--sombra-media); transform: translateY(-1px); }
+.lista-item-botao:active { transform: translateY(0); }
 .lista-item-botao strong { display: block; }
 .lista-item-sub { color: var(--cor-texto-suave); font-size: 0.85rem; }
 .contador-alertas {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   background: #fbecec;
   color: var(--cor-perigo);
   border: 1px solid #e5b4b1;
   border-radius: 999px;
-  padding: 0.2rem 0.7rem;
+  padding: 0.2rem 0.7rem 0.2rem 0.6rem;
   font-size: 0.8rem;
   font-weight: 700;
   white-space: nowrap;
 }
+.contador-alertas::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
 
 .vazio { color: var(--cor-texto-suave); font-style: italic; padding: 0.5rem 0; }
 
@@ -661,19 +667,20 @@ body {
   position: relative;
   overflow: hidden;
   display: flex;
-  background: var(--grad-marca);
-  color: #fff;
+  /* Fundo claro (aproxima o do vídeo) — as sobras do 'contain' não ficam
+     como barras azuis; o vídeo aparece inteiro e logo/slogan ficam legíveis. */
+  background: linear-gradient(180deg, #ffffff 0%, #e9f1f9 100%);
+  color: var(--cor-primaria-escura);
 }
 .login-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  /* contain mostra o quadro inteiro do vídeo (sem cortar as laterais). */
+  /* contain mostra o quadro inteiro do vídeo (sem cortar). */
   object-fit: contain;
 }
-/* Conteúdo por cima do vídeo: logo (plaquinha) no topo, slogan na base.
-   O scrim escurece só topo e base para legibilidade, deixando o vídeo à mostra. */
+/* Conteúdo por cima do vídeo: logo no topo, slogan na base (sem plaquinha). */
 .login-arte__conteudo {
   position: relative;
   z-index: 1;
@@ -683,23 +690,17 @@ body {
   justify-content: space-between;
   gap: 1rem;
   padding: 2rem;
-  background: linear-gradient(180deg, rgba(5, 46, 89, 0.45) 0%, rgba(5, 46, 89, 0) 22%, rgba(5, 46, 89, 0) 58%, rgba(5, 46, 89, 0.9) 100%);
 }
-.login-arte__logo {
-  align-self: flex-start;
-  background: #fff;
-  border-radius: var(--raio);
-  padding: 0.7rem 1rem;
-  box-shadow: var(--sombra-forte);
-}
-.login-arte__logo img { display: block; height: 52px; width: auto; }
+.login-arte__logo { align-self: flex-start; }
+.login-arte__logo img { display: block; height: 56px; width: auto; }
 .login-arte__slogan {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.45;
   max-width: 34ch;
-  color: #eaf6ff;
-  text-shadow: 0 1px 6px rgba(5, 46, 89, 0.85);
+  font-weight: 600;
+  /* mesmo azul do "Itaitinga" da logo */
+  color: var(--cor-primaria-escura);
 }
 
 .login-form-lado {
@@ -768,8 +769,10 @@ body {
    .heatmap-scroll / .line-scroll). */
 .tabela-scroll { overflow-x: auto; }
 .tabela { width: 100%; border-collapse: collapse; background: var(--cor-superficie); border: 1px solid var(--cor-borda); border-radius: var(--raio); overflow: hidden; }
-.tabela th, .tabela td { text-align: left; padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--cor-borda); }
-.tabela th { background: #f0f3f8; font-size: 0.85rem; }
+.tabela th, .tabela td { text-align: left; padding: 0.7rem 0.95rem; border-bottom: 1px solid var(--cor-borda); }
+.tabela th { background: var(--cor-superficie-2); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cor-texto-suave); font-weight: 700; }
+.tabela tbody tr { transition: background 0.14s ease; }
+.tabela tbody tr:hover { background: var(--cor-superficie-2); }
 .tabela tr:last-child td { border-bottom: none; }
 
 /* Selo de perfil (usado na gestão de usuários) */
@@ -816,9 +819,11 @@ body {
   background: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
-  padding: 0.85rem 1rem;
+  padding: 0.9rem 1.05rem;
   flex-wrap: wrap;
+  transition: border-color 0.15s ease, box-shadow 0.16s ease;
 }
+.lista-item-info:hover { border-color: var(--cor-borda-forte); box-shadow: var(--sombra-media); }
 .lista-item-info strong { display: block; }
 /* Deixa o bloco de nome/e-mail encolher (e-mails longos quebram) em vez de
    empurrar as ações (Editar/Remover) para fora da tela no celular. */
@@ -842,8 +847,9 @@ body {
 }
 
 /* ---- Notificações ---- */
-.card--notificacao { margin: 0; padding: 0.9rem 1rem; }
-.card--notificacao.nao-lida { border-left: 4px solid var(--cor-perigo); }
+.card--notificacao { margin: 0; padding: 0.95rem 1.1rem; transition: box-shadow 0.16s ease; }
+.card--notificacao:hover { box-shadow: var(--sombra-media); }
+.card--notificacao.nao-lida { border-left: 4px solid var(--cor-perigo); background: #fff7f6; }
 .notif-topo { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .ponto-nao-lida { width: 10px; height: 10px; border-radius: 50%; background: var(--cor-perigo); flex-shrink: 0; }
 .notif-rodape { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.5rem; }
