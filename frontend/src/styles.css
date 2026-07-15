@@ -83,16 +83,15 @@ body {
   height: 100vh;
   overflow-y: auto;
 }
-/* Logo oficial (letreiro vetorial) numa plaquinha clara sobre o gradiente. */
+/* Logo (versão branca) direto sobre o gradiente — sem plaquinha, harmônico
+   com o login (logo direto no fundo). */
 .sidebar-marca {
   display: block;
   width: auto;
-  margin: 0.9rem 0.8rem 0.5rem;
-  padding: 0.7rem 0.9rem;
-  background: #fff;
+  margin: 0;
+  padding: 1.25rem 1.15rem 0.5rem;
+  background: none;
   border: none;
-  border-radius: var(--raio);
-  box-shadow: var(--sombra);
   cursor: pointer;
 }
 .sidebar-marca img { display: block; width: 100%; height: auto; }

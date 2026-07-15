@@ -165,7 +165,7 @@ export default function App() {
             onClick={() => irPara(cidadao ? 'infraestrutura' : 'dashboard')}
             aria-label="Ir para a página inicial"
           >
-            <img src="/marca/logo-horizontal.svg" alt="Itaitinga Conectada" />
+            <img src="/marca/logo-branco.svg" alt="Itaitinga Conectada" />
           </button>
 
           <nav className="sidebar-nav" aria-label="Navegação principal">
@@ -256,6 +256,7 @@ export default function App() {
 
           <footer className="rodape-app">
             <p>Itaitinga Conectada · Educação e cidadania com foco em acessibilidade</p>
+            <p>Projeto Científico Lídia Alves Cavalcante 2026</p>
           </footer>
         </div>
       </div>
@@ -281,7 +282,7 @@ function PortalPublicoShell({ children, onVoltar }) {
 
         <aside className="sidebar">
           <button className="sidebar-marca" onClick={onVoltar} aria-label="Ir para o login">
-            <img src="/marca/logo-horizontal.svg" alt="Itaitinga Conectada" />
+            <img src="/marca/logo-branco.svg" alt="Itaitinga Conectada" />
           </button>
 
           <nav className="sidebar-nav" aria-label="Navegação principal">
