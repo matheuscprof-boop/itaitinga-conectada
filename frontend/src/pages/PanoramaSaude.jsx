@@ -51,7 +51,8 @@ export default function PanoramaSaude() {
           emojiLabel: r.pre_natal ? 'Gestante com pré-natal' : 'Gestante sem pré-natal',
           popup:
             `<strong>${escaparHtml(r.nome)}</strong><br/>` +
-            `${escaparHtml(r.escola_nome || '—')} · ${escaparHtml(r.turma)}<br/>` +
+            `🏠 Residência: ${escaparHtml(r.endereco || 'não informada')}<br/>` +
+            `<span style="color:#5b6675">${escaparHtml(r.escola_nome || '—')} · ${escaparHtml(r.turma)}</span><br/>` +
             `Pré-natal: <em>${r.pre_natal ? 'sim' : 'não'}</em>`,
         })),
     [atuais]
@@ -97,7 +98,7 @@ export default function PanoramaSaude() {
 
       {/* Mapa */}
       <div className="card">
-        <h3>Mapa das gestantes</h3>
+        <h3>Mapa das gestantes (por residência)</h3>
         {comLocalizacao > 0 ? (
           <>
             <MapaLeaflet marcadores={marcadores} altura={360} />

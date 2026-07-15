@@ -65,29 +65,36 @@ const aplicar = db.transaction(() => {
   }
 
   // 2) Zera as flags de gestação (idempotência) e escolhe 3 alunas do 9º ano
-  //    (as mais velhas), determinístico por id.
+  //    (as mais velhas), determinístico por id. As duas gestantes ficam em
+  //    ESCOLAS DIFERENTES para o mapa não parecer "duas no mesmo lugar".
   zerarGestacao.run();
   let alunas = db
-    .prepare("SELECT id, nome, turma FROM alunos WHERE sexo = 'feminino' AND turma LIKE '9%' ORDER BY id")
+    .prepare("SELECT id, nome, turma, escola_id FROM alunos WHERE sexo = 'feminino' AND turma LIKE '9%' ORDER BY id")
     .all();
   if (alunas.length < 3) {
-    alunas = db.prepare("SELECT id, nome, turma FROM alunos WHERE sexo = 'feminino' ORDER BY id").all();
+    alunas = db.prepare("SELECT id, nome, turma, escola_id FROM alunos WHERE sexo = 'feminino' ORDER BY id").all();
   }
 
+  const g1 = alunas[0];
+  // 2ª gestante: a primeira de uma ESCOLA diferente da 1ª (senão, a próxima).
+  const g2 = alunas.find((a) => g1 && a.escola_id !== g1.escola_id) || alunas[1];
+  // Histórico: a primeira que não seja g1 nem g2.
+  const hist = alunas.find((a) => a.id !== g1?.id && a.id !== g2?.id) || alunas[2];
+
   const marcadas = [];
-  if (alunas[0]) {
-    upSaude.run({ id: alunas[0].id, peso: 56, altura: 1.60, grav: 1, hist: 0, pre: 1 });
-    upAssist.run({ id: alunas[0].id, ...LOCAIS.centro });
-    marcadas.push(`gestante c/ pré-natal: ${alunas[0].nome} (${alunas[0].turma})`);
+  if (g1) {
+    upSaude.run({ id: g1.id, peso: 56, altura: 1.60, grav: 1, hist: 0, pre: 1 });
+    upAssist.run({ id: g1.id, ...LOCAIS.centro });
+    marcadas.push(`gestante c/ pré-natal: ${g1.nome} (${g1.turma})`);
   }
-  if (alunas[1]) {
-    upSaude.run({ id: alunas[1].id, peso: 60, altura: 1.63, grav: 1, hist: 0, pre: 0 });
-    upAssist.run({ id: alunas[1].id, ...LOCAIS.gereru });
-    marcadas.push(`gestante s/ pré-natal: ${alunas[1].nome} (${alunas[1].turma})`);
+  if (g2) {
+    upSaude.run({ id: g2.id, peso: 60, altura: 1.63, grav: 1, hist: 0, pre: 0 });
+    upAssist.run({ id: g2.id, ...LOCAIS.gereru });
+    marcadas.push(`gestante s/ pré-natal: ${g2.nome} (${g2.turma})`);
   }
-  if (alunas[2]) {
-    upSaude.run({ id: alunas[2].id, peso: 58.5, altura: 1.62, grav: 0, hist: 1, pre: 0 });
-    marcadas.push(`histórico de gestação: ${alunas[2].nome} (${alunas[2].turma})`);
+  if (hist) {
+    upSaude.run({ id: hist.id, peso: 58.5, altura: 1.62, grav: 0, hist: 1, pre: 0 });
+    marcadas.push(`histórico de gestação: ${hist.nome} (${hist.turma})`);
   }
   return { f, m, marcadas };
 });
