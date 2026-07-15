@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { obterLocalizacao } from '../geo.js';
 import MapaLeaflet from '../components/MapaLeaflet.jsx';
+import EstadoVazio from '../components/EstadoVazio.jsx';
 
 const FORM_VAZIO = { nome: '', municipio: '', endereco: '', latitude: '', longitude: '' };
 
@@ -187,7 +188,9 @@ export default function Escolas() {
       <section aria-labelledby="titulo-lista-escolas">
         <h3 id="titulo-lista-escolas">Escolas cadastradas</h3>
         {escolas.length === 0 ? (
-          <p className="vazio">Nenhuma escola cadastrada.</p>
+          <EstadoVazio icone="🏫" titulo="Nenhuma escola cadastrada">
+            Cadastre uma escola no formulário acima.
+          </EstadoVazio>
         ) : (
           <ul className="lista" role="list">
             {escolas.map((e) => (

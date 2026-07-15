@@ -222,6 +222,7 @@ export default function App() {
           </header>
 
           <main id="conteudo" className="conteudo">
+          <div className="view-anim" key={view.tela}>
         {/* Telas de equipe */}
         {!cidadao && view.tela === 'dashboard' && (
           <Dashboard
@@ -252,6 +253,7 @@ export default function App() {
         {view.tela === 'infraestrutura' && <PortalCidadao usuario={usuario} />}
 
         {view.tela === 'conta' && <MinhaConta usuario={usuario} />}
+          </div>
       </main>
 
           <footer className="rodape-app">

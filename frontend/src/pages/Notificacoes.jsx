@@ -1,6 +1,7 @@
 // Feed de notificações da equipe de gestão (alertas de nível alto).
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
+import EstadoVazio from '../components/EstadoVazio.jsx';
 
 function formatarData(iso) {
   if (!iso) return '';
@@ -57,7 +58,9 @@ export default function Notificacoes({ onMudou }) {
       {carregando && <p className="vazio" role="status">Carregando…</p>}
 
       {!carregando && notificacoes.length === 0 && (
-        <p className="vazio">Nenhuma notificação no momento.</p>
+        <EstadoVazio icone="🔔" titulo="Nenhuma notificação no momento">
+          Você está em dia! Novos alertas de nível alto aparecerão aqui.
+        </EstadoVazio>
       )}
 
       <ul className="lista" role="list">

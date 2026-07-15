@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api, ROTULOS, ehSecretaria } from '../api.js';
 import Badge from '../components/Badge.jsx';
+import EstadoVazio from '../components/EstadoVazio.jsx';
 
 const FORM_VAZIO = {
   nome: '', email: '', senha: '', perfil: 'professor', escola_id: '',
@@ -334,7 +335,9 @@ export default function Usuarios({ usuarioAtualId, perfil }) {
       <section aria-labelledby="titulo-lista-usuarios">
         <h3 id="titulo-lista-usuarios">Usuários cadastrados</h3>
         {usuarios.length === 0 ? (
-          <p className="vazio">Nenhum usuário cadastrado.</p>
+          <EstadoVazio icone="👥" titulo="Nenhum usuário cadastrado">
+            Novos cadastros aparecem aqui após a confirmação de e-mail.
+          </EstadoVazio>
         ) : (
           <ul className="lista" role="list">
             {usuarios.map((u) => (

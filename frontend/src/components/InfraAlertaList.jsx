@@ -1,12 +1,17 @@
 // Lista de alertas de infraestrutura em cartões, com foto, categoria, status e
 // autoria (ou "Anônimo"). Para a Secretaria, permite alterar o status.
 import { ROTULOS } from '../api.js';
+import EstadoVazio from './EstadoVazio.jsx';
 
 const STATUS_INFRA = ['aberto', 'em_andamento', 'resolvido'];
 
 export default function InfraAlertaList({ alertas, podeGerenciarStatus = false, onAtualizarStatus }) {
   if (!alertas || alertas.length === 0) {
-    return <p className="vazio">Nenhum alerta registrado ainda.</p>;
+    return (
+      <EstadoVazio icone="🛠️" titulo="Nenhum alerta registrado ainda">
+        Os relatos de infraestrutura da população aparecem aqui.
+      </EstadoVazio>
+    );
   }
 
   return (

@@ -1,5 +1,6 @@
 // Lista de alunos com busca. Cada linha mostra dados essenciais e a
 // quantidade de alertas abertos, servindo de porta de entrada para o detalhe.
+import EstadoVazio from './EstadoVazio.jsx';
 
 export default function AlunoList({ alunos, busca, podeCriar, onBuscar, onAbrir, onNovo }) {
   return (
@@ -25,7 +26,9 @@ export default function AlunoList({ alunos, busca, podeCriar, onBuscar, onAbrir,
       </div>
 
       {alunos.length === 0 ? (
-        <p className="vazio">Nenhum aluno encontrado.</p>
+        <EstadoVazio icone="🔎" titulo="Nenhum aluno encontrado">
+          {busca ? 'Ajuste a busca ou verifique a grafia.' : 'Cadastre o primeiro aluno para começar.'}
+        </EstadoVazio>
       ) : (
         <ul className="lista" role="list">
           {alunos.map((aluno) => (

@@ -513,6 +513,37 @@ body {
 
 .vazio { color: var(--cor-texto-suave); font-style: italic; padding: 0.5rem 0; }
 
+/* ---- Estado vazio ilustrado ---- */
+.estado-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+  padding: 2.5rem 1.5rem;
+  color: var(--cor-texto-suave);
+}
+.estado-vazio__ic {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  line-height: 1;
+  background: var(--cor-primaria-clara);
+  margin-bottom: 0.4rem;
+}
+.estado-vazio__titulo { margin: 0; font-weight: 700; color: var(--cor-texto); font-size: 1rem; }
+.estado-vazio__sub { margin: 0; font-size: 0.88rem; max-width: 44ch; }
+
+/* ---- Micro-interação: entrada suave do conteúdo ao trocar de tela ---- */
+@keyframes view-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.view-anim { animation: view-in 0.26s ease both; }
+
 /* ---- Cartão de informações do aluno ---- */
 .lista-descricao {
   display: grid;
