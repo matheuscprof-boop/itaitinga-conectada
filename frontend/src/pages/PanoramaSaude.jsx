@@ -77,14 +77,17 @@ export default function PanoramaSaude() {
       {/* Cartões-resumo */}
       <div className="resumo-cards">
         <div className="cartao-resumo cartao-resumo--info">
+          <span className="metrica-ic" aria-hidden="true">🤰</span>
           <strong>{atuais.length}</strong>
           <span>Gestantes atuais</span>
         </div>
         <div className="cartao-resumo cartao-resumo--alerta">
+          <span className="metrica-ic" aria-hidden="true">⚠️</span>
           <strong>{semPreNatal.length}</strong>
           <span>Sem acompanhamento pré-natal</span>
         </div>
         <div className="cartao-resumo">
+          <span className="metrica-ic" aria-hidden="true">📋</span>
           <strong>{historico.length}</strong>
           <span>Com histórico de gestação</span>
         </div>

@@ -5,6 +5,7 @@ import AlunoList from '../components/AlunoList.jsx';
 import AlunoForm from '../components/AlunoForm.jsx';
 
 const EIXOS = ['frequencia', 'desempenho', 'socioemocional'];
+const ICONE_EIXO = { frequencia: '📅', desempenho: '📝', socioemocional: '💬' };
 
 export default function Dashboard({ perfil, onAbrirAluno }) {
   const podeCriar = podeGerenciar(perfil);
@@ -52,6 +53,7 @@ export default function Dashboard({ perfil, onAbrirAluno }) {
         <div className="cards-resumo">
           {EIXOS.map((eixo) => (
             <div key={eixo} className={`card card--metrica metrica--${eixo}`}>
+              <span className="metrica-ic" aria-hidden="true">{ICONE_EIXO[eixo]}</span>
               <span className="metrica-valor">{resumo[eixo] ?? 0}</span>
               <span className="metrica-rotulo">{ROTULOS.eixo[eixo]}</span>
             </div>

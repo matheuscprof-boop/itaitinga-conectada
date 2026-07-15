@@ -5,11 +5,12 @@
    ===================================================================== */
 
 :root {
-  --cor-fundo: #eef2f7;
+  --cor-fundo: #eaf0f7;              /* near-white com leve viés azul */
   --cor-superficie: #ffffff;
-  --cor-borda: #e2e8f0;
+  --cor-superficie-2: #f4f8fd;       /* superfície tint (blocos secundários) */
+  --cor-borda: #e4eaf1;
   --cor-borda-forte: #cbd5e1;
-  --cor-texto: #172033;
+  --cor-texto: #10263f;              /* tinta com leve viés navy */
   --cor-texto-suave: #5b6675;
   /* Cores oficiais da marca Itaitinga Conectada (extraídas do vetor). */
   --cor-primaria: #086EBD;         /* azul da marca */
@@ -23,10 +24,11 @@
   --cor-perigo-clara: #fbecec;
   /* Gradiente da marca — usado na sidebar e nos painéis de destaque. */
   --grad-marca: linear-gradient(170deg, #052E59 0%, #086EBD 48%, #0BACAE 100%);
-  --raio: 12px;
-  --raio-pequeno: 8px;
-  --sombra: 0 1px 2px rgba(5, 46, 89, 0.05), 0 4px 12px rgba(5, 46, 89, 0.07);
-  --sombra-forte: 0 8px 28px rgba(5, 46, 89, 0.16);
+  --raio: 14px;
+  --raio-pequeno: 9px;
+  --sombra: 0 1px 2px rgba(5, 46, 89, 0.05), 0 4px 14px rgba(5, 46, 89, 0.07);
+  --sombra-media: 0 6px 16px rgba(5, 46, 89, 0.10), 0 2px 4px rgba(5, 46, 89, 0.06);
+  --sombra-forte: 0 16px 40px rgba(5, 46, 89, 0.18);
   --largura-sidebar: 244px;
   --fonte: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -276,26 +278,40 @@ body {
 }
 .secao-cabecalho h2 { margin: 0; }
 
-/* ---- Cartões de métrica (resumo por eixo) ---- */
+/* ---- Cartões de indicador (KPI): ícone em chip + número grande + rótulo.
+   Substitui a barra lateral por um ícone colorido — mais moderno e escaneável. */
 .cards-resumo {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.1rem;
+  margin-bottom: 1.75rem;
 }
 .card--metrica {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 1rem 1.25rem;
-  border-left: 6px solid var(--cor-primaria);
+  gap: 0.55rem;
+  padding: 1.15rem 1.25rem;
   margin: 0;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
-.metrica-valor { font-size: 2rem; font-weight: 800; line-height: 1; }
-.metrica-rotulo { color: var(--cor-texto-suave); margin-top: 0.25rem; }
-.metrica--frequencia { border-left-color: #b3261e; }
-.metrica--desempenho { border-left-color: #b8860b; }
-.metrica--socioemocional { border-left-color: #1f5fbf; }
+.card--metrica:hover { transform: translateY(-3px); box-shadow: var(--sombra-media); }
+/* Chip do ícone (reutilizado nos KPIs do Panorama de Saúde). */
+.metrica-ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  line-height: 1;
+  background: var(--cor-primaria-clara);
+}
+.metrica-valor { font-size: 2.1rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.metrica-rotulo { color: var(--cor-texto-suave); margin: 0; font-size: 0.9rem; }
+.metrica--frequencia .metrica-ic { background: #fbe9e7; }
+.metrica--desempenho .metrica-ic { background: #fdf1d9; }
+.metrica--socioemocional .metrica-ic { background: #e7f1fb; }
 
 /* ---- Formulários ---- */
 .form h2, .form h3 { margin-top: 0; }
@@ -950,13 +966,16 @@ body {
 }
 .cartao-resumo {
   background: var(--cor-superficie); border: 1px solid var(--cor-borda);
-  border-left: 5px solid #c6d2e6; border-radius: 10px; padding: 1rem 1.2rem;
-  display: flex; flex-direction: column; gap: 0.2rem;
+  border-radius: var(--raio); padding: 1.15rem 1.25rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  box-shadow: var(--sombra);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
-.cartao-resumo strong { font-size: 2rem; line-height: 1; color: var(--cor-texto); }
+.cartao-resumo:hover { transform: translateY(-3px); box-shadow: var(--sombra-media); }
+.cartao-resumo .metrica-ic { background: var(--cor-primaria-clara); }
+.cartao-resumo strong { font-size: 2.1rem; line-height: 1; color: var(--cor-texto); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .cartao-resumo span { color: var(--cor-texto-suave); font-size: 0.9rem; }
-.cartao-resumo--info { border-left-color: var(--cor-primaria); }
-.cartao-resumo--alerta { border-left-color: var(--cor-perigo); }
+.cartao-resumo--alerta .metrica-ic { background: #fbe9e7; }
 .linha-alerta { background: #fbecec; }
 
 /* ---- Impressão (Relatórios → PDF) ---- */
