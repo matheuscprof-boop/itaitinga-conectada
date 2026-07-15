@@ -28,7 +28,6 @@
   --sombra: 0 1px 2px rgba(5, 46, 89, 0.05), 0 4px 12px rgba(5, 46, 89, 0.07);
   --sombra-forte: 0 8px 28px rgba(5, 46, 89, 0.16);
   --largura-sidebar: 244px;
-  --altura-topbar: 62px;
   --fonte: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -67,43 +66,36 @@ body {
 /* =====================================================================
    Shell da aplicação: menu lateral (sidebar) + barra superior + conteúdo
    ===================================================================== */
-.app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+.app-shell { display: flex; min-height: 100vh; }
 
-/* Barra superior branca (logo + usuário), largura total — como no modelo. */
-.topbar {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  height: var(--altura-topbar);
-  padding: 0 1.5rem;
-  background: var(--cor-superficie);
-  border-bottom: 1px solid var(--cor-borda);
-  position: sticky;
-  top: 0;
-  z-index: 60;
-}
-.topbar__logo { background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; }
-.topbar__logo img { height: 38px; width: auto; display: block; }
-
-/* Corpo: menu lateral + área de conteúdo */
-.app-corpo { display: flex; flex: 1; min-height: 0; }
-
-/* ---- Menu lateral (colorido, só navegação) ---- */
+/* ---- Menu lateral ---- */
 .sidebar {
   width: var(--largura-sidebar);
   flex-shrink: 0;
-  align-self: flex-start;
   background: var(--grad-marca);
   color: #fff;
   display: flex;
   flex-direction: column;
   position: sticky;
-  top: var(--altura-topbar);
-  height: calc(100vh - var(--altura-topbar));
+  top: 0;
+  height: 100vh;
   overflow-y: auto;
 }
+/* Logo oficial (letreiro vetorial) numa plaquinha clara sobre o gradiente. */
+.sidebar-marca {
+  display: block;
+  width: auto;
+  margin: 0.9rem 0.8rem 0.5rem;
+  padding: 0.7rem 0.9rem;
+  background: #fff;
+  border: none;
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  cursor: pointer;
+}
+.sidebar-marca img { display: block; width: 100%; height: auto; }
 
-.sidebar-nav { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.9rem 0.6rem 1rem; flex: 1; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.4rem 0.6rem 1rem; flex: 1; }
 .sidebar-grupo {
   margin: 0.85rem 0 0.25rem;
   padding: 0 0.65rem;
@@ -157,9 +149,20 @@ body {
 .sidebar-item .contador-nav { margin-left: 0; background: var(--cor-amarelo); color: #3a2a00; }
 .sidebar-item--ativo .contador-nav { background: var(--cor-perigo); color: #fff; }
 
-/* ---- Área de conteúdo ---- */
+/* ---- Área principal (barra superior + conteúdo) ---- */
 .area-principal { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.5rem;
+  background: var(--cor-superficie);
+  border-bottom: 1px solid var(--cor-borda);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
 .topbar__menu-btn {
   display: none;
   font-size: 1.35rem;
@@ -239,10 +242,10 @@ body {
 @media (max-width: 900px) {
   .sidebar {
     position: fixed;
-    top: var(--altura-topbar);
+    top: 0;
     left: 0;
     z-index: 50;
-    height: calc(100vh - var(--altura-topbar));
+    height: 100vh;
     transform: translateX(-100%);
     transition: transform 0.22s ease;
     box-shadow: var(--sombra-forte);
@@ -250,10 +253,6 @@ body {
   .app-shell.menu-aberto .sidebar { transform: translateX(0); }
   .app-shell.menu-aberto .sidebar-overlay { display: block; }
   .topbar__menu-btn { display: inline-block; }
-}
-@media (max-width: 560px) {
-  .topbar { padding: 0 1rem; }
-  .topbar__saudacao { display: none; }
 }
 
 /* ---- Cartões genéricos ---- */
@@ -583,6 +582,20 @@ body {
 .usuario-nome { color: #fff; font-size: 0.85rem; display: flex; flex-direction: column; line-height: 1.2; }
 .usuario-perfil { color: #cddcf3; font-size: 0.75rem; }
 
+/* ---- Tela de carregamento inicial (vídeo do logo animado) ---- */
+.tela-carregando {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--grad-marca);
+  color: #fff;
+}
+.tela-carregando video { width: min(320px, 72vw); height: auto; }
+.tela-carregando p { margin: 0; font-weight: 600; letter-spacing: 0.5px; }
+
 /* ---- Tela de login em dois painéis (arte com vídeo + formulário) ---- */
 .tela-login {
   min-height: 100vh;
@@ -596,20 +609,16 @@ body {
   background: var(--grad-marca);
   color: #fff;
 }
-/* Vídeo em tamanho natural (largura total, sem corte) centralizado, com as
-   bordas esfumadas por uma máscara radial — dissolve no gradiente da marca,
-   sem retângulo nem emenda dura. */
 .login-video {
   position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  inset: 0;
   width: 100%;
-  height: auto;
-  -webkit-mask-image: radial-gradient(125% 112% at 50% 50%, #000 50%, transparent 88%);
-          mask-image: radial-gradient(125% 112% at 50% 50%, #000 50%, transparent 88%);
+  height: 100%;
+  /* contain mostra o quadro inteiro do vídeo (sem cortar as laterais). */
+  object-fit: contain;
 }
-/* Conteúdo por cima do vídeo: logo (branca) no topo, slogan na base. */
+/* Conteúdo por cima do vídeo: logo (plaquinha) no topo, slogan na base.
+   O scrim escurece só topo e base para legibilidade, deixando o vídeo à mostra. */
 .login-arte__conteudo {
   position: relative;
   z-index: 1;
@@ -618,19 +627,24 @@ body {
   flex-direction: column;
   justify-content: space-between;
   gap: 1rem;
-  padding: 2.25rem;
+  padding: 2rem;
+  background: linear-gradient(180deg, rgba(5, 46, 89, 0.45) 0%, rgba(5, 46, 89, 0) 22%, rgba(5, 46, 89, 0) 58%, rgba(5, 46, 89, 0.9) 100%);
 }
-.login-arte__logo { align-self: flex-start; }
-/* Sombra sutil para o letreiro branco continuar legível mesmo quando o vídeo
-   (fundo claro) fica logo atrás — importante no mobile, onde a faixa é curta. */
-.login-arte__logo img { display: block; height: 58px; width: auto; filter: drop-shadow(0 2px 7px rgba(5, 46, 89, 0.7)); }
+.login-arte__logo {
+  align-self: flex-start;
+  background: #fff;
+  border-radius: var(--raio);
+  padding: 0.7rem 1rem;
+  box-shadow: var(--sombra-forte);
+}
+.login-arte__logo img { display: block; height: 52px; width: auto; }
 .login-arte__slogan {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.45;
   max-width: 34ch;
   color: #eaf6ff;
-  text-shadow: 0 1px 8px rgba(5, 46, 89, 0.9);
+  text-shadow: 0 1px 6px rgba(5, 46, 89, 0.85);
 }
 
 .login-form-lado {
@@ -655,9 +669,10 @@ body {
 
 /* No celular, o painel de arte vira uma faixa curta no topo. */
 @media (max-width: 760px) {
-  .tela-login { grid-template-columns: 1fr; grid-template-rows: 200px auto; }
-  .login-arte__conteudo { padding: 1.1rem 1.25rem; }
-  .login-arte__logo img { height: 40px; }
+  .tela-login { grid-template-columns: 1fr; grid-template-rows: 180px auto; }
+  .login-arte__conteudo { padding: 1rem 1.25rem; justify-content: flex-start; }
+  .login-arte__logo { padding: 0.5rem 0.75rem; }
+  .login-arte__logo img { height: 36px; }
   .login-arte__slogan { display: none; }
 }
 

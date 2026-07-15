@@ -152,41 +152,23 @@ export default function App() {
       <a href="#conteudo" className="pular-para-conteudo">Pular para o conteúdo</a>
 
       <div className={`app-shell ${menuAberto ? 'menu-aberto' : ''}`}>
-        <header className="topbar">
+        <button
+          className="sidebar-overlay"
+          aria-label="Fechar menu"
+          tabIndex={menuAberto ? 0 : -1}
+          onClick={() => setMenuAberto(false)}
+        />
+
+        <aside className="sidebar">
           <button
-            className="topbar__menu-btn"
-            onClick={() => setMenuAberto((a) => !a)}
-            aria-label="Abrir menu"
-            aria-expanded={menuAberto}
-          >
-            ☰
-          </button>
-          <button
-            className="topbar__logo"
+            className="sidebar-marca"
             onClick={() => irPara(cidadao ? 'infraestrutura' : 'dashboard')}
             aria-label="Ir para a página inicial"
           >
             <img src="/marca/logo-horizontal.svg" alt="Itaitinga Conectada" />
           </button>
-          <div className="topbar__acoes">
-            <div className="topbar__saudacao">
-              <span className="topbar__ola">Olá, {usuario.nome.split(' ')[0]}</span>
-              <span className="topbar__perfil">{ROTULOS.perfil[usuario.perfil]}</span>
-            </div>
-            <button className="btn btn--pequeno" onClick={sair}>Sair</button>
-          </div>
-        </header>
 
-        <div className="app-corpo">
-          <button
-            className="sidebar-overlay"
-            aria-label="Fechar menu"
-            tabIndex={menuAberto ? 0 : -1}
-            onClick={() => setMenuAberto(false)}
-          />
-
-          <aside className="sidebar">
-            <nav className="sidebar-nav" aria-label="Navegação principal">
+          <nav className="sidebar-nav" aria-label="Navegação principal">
             {cidadao ? (
               <>
                 <ItemNav tela="infraestrutura" icone="🛠️" rotulo="Infraestrutura" />
@@ -221,6 +203,24 @@ export default function App() {
         </aside>
 
         <div className="area-principal">
+          <header className="topbar">
+            <button
+              className="topbar__menu-btn"
+              onClick={() => setMenuAberto((a) => !a)}
+              aria-label="Abrir menu"
+              aria-expanded={menuAberto}
+            >
+              ☰
+            </button>
+            <div className="topbar__saudacao">
+              <span className="topbar__ola">Olá, {usuario.nome.split(' ')[0]}</span>
+              <span className="topbar__perfil">{ROTULOS.perfil[usuario.perfil]}</span>
+            </div>
+            <div className="topbar__acoes">
+              <button className="btn btn--pequeno" onClick={sair}>Sair</button>
+            </div>
+          </header>
+
           <main id="conteudo" className="conteudo">
         {/* Telas de equipe */}
         {!cidadao && view.tela === 'dashboard' && (
@@ -257,7 +257,6 @@ export default function App() {
           <footer className="rodape-app">
             <p>Itaitinga Conectada · Educação e cidadania com foco em acessibilidade</p>
           </footer>
-          </div>
         </div>
       </div>
     </>
@@ -273,54 +272,57 @@ function PortalPublicoShell({ children, onVoltar }) {
       <a href="#conteudo" className="pular-para-conteudo">Pular para o conteúdo</a>
 
       <div className={`app-shell ${menuAberto ? 'menu-aberto' : ''}`}>
-        <header className="topbar">
-          <button
-            className="topbar__menu-btn"
-            onClick={() => setMenuAberto((a) => !a)}
-            aria-label="Abrir menu"
-            aria-expanded={menuAberto}
-          >
-            ☰
-          </button>
-          <button className="topbar__logo" onClick={onVoltar} aria-label="Ir para o login">
+        <button
+          className="sidebar-overlay"
+          aria-label="Fechar menu"
+          tabIndex={menuAberto ? 0 : -1}
+          onClick={() => setMenuAberto(false)}
+        />
+
+        <aside className="sidebar">
+          <button className="sidebar-marca" onClick={onVoltar} aria-label="Ir para o login">
             <img src="/marca/logo-horizontal.svg" alt="Itaitinga Conectada" />
           </button>
-          <div className="topbar__acoes">
-            <button className="btn btn--primario btn--pequeno" onClick={onVoltar}>Entrar</button>
-          </div>
-        </header>
 
-        <div className="app-corpo">
-          <button
-            className="sidebar-overlay"
-            aria-label="Fechar menu"
-            tabIndex={menuAberto ? 0 : -1}
-            onClick={() => setMenuAberto(false)}
-          />
+          <nav className="sidebar-nav" aria-label="Navegação principal">
+            <p className="sidebar-grupo">Portal público</p>
+            <button className="sidebar-item sidebar-item--ativo" aria-current="page">
+              <span className="sidebar-item__icone" aria-hidden="true">🛠️</span>
+              <span className="sidebar-item__rotulo">Infraestrutura</span>
+            </button>
 
-          <aside className="sidebar">
-            <nav className="sidebar-nav" aria-label="Navegação principal">
-              <p className="sidebar-grupo">Portal público</p>
-              <button className="sidebar-item sidebar-item--ativo" aria-current="page">
-                <span className="sidebar-item__icone" aria-hidden="true">🛠️</span>
-                <span className="sidebar-item__rotulo">Infraestrutura</span>
-              </button>
+            <p className="sidebar-grupo">Acesso</p>
+            <button className="sidebar-item" onClick={onVoltar}>
+              <span className="sidebar-item__icone" aria-hidden="true">🔑</span>
+              <span className="sidebar-item__rotulo">Entrar</span>
+            </button>
+          </nav>
+        </aside>
 
-              <p className="sidebar-grupo">Acesso</p>
-              <button className="sidebar-item" onClick={onVoltar}>
-                <span className="sidebar-item__icone" aria-hidden="true">🔑</span>
-                <span className="sidebar-item__rotulo">Entrar</span>
-              </button>
-            </nav>
-          </aside>
+        <div className="area-principal">
+          <header className="topbar">
+            <button
+              className="topbar__menu-btn"
+              onClick={() => setMenuAberto((a) => !a)}
+              aria-label="Abrir menu"
+              aria-expanded={menuAberto}
+            >
+              ☰
+            </button>
+            <div className="topbar__saudacao">
+              <span className="topbar__ola">Portal público</span>
+              <span className="topbar__perfil">Infraestrutura e cidadania</span>
+            </div>
+            <div className="topbar__acoes">
+              <button className="btn btn--primario btn--pequeno" onClick={onVoltar}>Entrar</button>
+            </div>
+          </header>
 
-          <div className="area-principal">
-            <main id="conteudo" className="conteudo">{children}</main>
+          <main id="conteudo" className="conteudo">{children}</main>
 
-            <footer className="rodape-app">
-              <p>Itaitinga Conectada · Portal público de infraestrutura</p>
-            </footer>
-          </div>
+          <footer className="rodape-app">
+            <p>Itaitinga Conectada · Portal público de infraestrutura</p>
+          </footer>
         </div>
       </div>
     </>
