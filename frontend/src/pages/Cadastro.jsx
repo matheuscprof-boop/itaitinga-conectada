@@ -60,6 +60,26 @@ export default function Cadastro({ onVoltar, onRegistrado }) {
 
   return (
     <div className="tela-login">
+      <aside className="login-arte">
+        <video
+          className="login-video"
+          src="/marca/logo-animada.mp4"
+          autoPlay
+          muted
+          playsInline
+          aria-hidden="true"
+        />
+        <div className="login-arte__conteudo">
+          <div className="login-arte__logo">
+            <img src="/marca/logo-horizontal.svg" alt="Itaitinga Conectada" />
+          </div>
+          <p className="login-arte__slogan">
+            Inovação maker para a cidadania integral — educação, saúde e cidadania de Itaitinga em um só lugar.
+          </p>
+        </div>
+      </aside>
+
+      <div className="login-form-lado">
       <form className="card form form-login" onSubmit={enviar} aria-labelledby="titulo-cadastro">
         <h1 id="titulo-cadastro">Criar conta</h1>
         <p className="subtitulo-login">Itaitinga Conectada</p>
@@ -133,6 +153,7 @@ export default function Cadastro({ onVoltar, onRegistrado }) {
           ← Voltar ao login
         </button>
       </form>
+      </div>
     </div>
   );
 }
