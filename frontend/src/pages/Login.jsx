@@ -41,11 +41,7 @@ export default function Login({ onLogin, onCadastrar, onPortal, onPrecisaVerific
         />
         <div className="login-arte__conteudo">
           <div className="login-arte__logo">
-            <img src="/marca/simbolo.svg" alt="" />
-            <span>
-              <b>Itaitinga</b>
-              <span>CONECTADA</span>
-            </span>
+            <img src="/marca/logo-horizontal.svg" alt="Itaitinga Conectada" />
           </div>
           <p className="login-arte__slogan">
             Inovação maker para a cidadania integral — educação, saúde e cidadania de Itaitinga em um só lugar.

@@ -170,11 +170,7 @@ export default function App() {
             onClick={() => irPara(cidadao ? 'infraestrutura' : 'dashboard')}
             aria-label="Ir para a página inicial"
           >
-            <img src="/marca/simbolo.svg" alt="" />
-            <span className="sidebar-marca__texto">
-              <span className="sidebar-marca__nome">Itaitinga</span>
-              <span className="sidebar-marca__sub">CONECTADA</span>
-            </span>
+            <img src="/marca/logo-horizontal.svg" alt="Itaitinga Conectada" />
           </button>
 
           <nav className="sidebar-nav" aria-label="Navegação principal">
@@ -290,11 +286,7 @@ function PortalPublicoShell({ children, onVoltar }) {
 
         <aside className="sidebar">
           <button className="sidebar-marca" onClick={onVoltar} aria-label="Ir para o login">
-            <img src="/marca/simbolo.svg" alt="" />
-            <span className="sidebar-marca__texto">
-              <span className="sidebar-marca__nome">Itaitinga</span>
-              <span className="sidebar-marca__sub">CONECTADA</span>
-            </span>
+            <img src="/marca/logo-horizontal.svg" alt="Itaitinga Conectada" />
           </button>
 
           <nav className="sidebar-nav" aria-label="Navegação principal">

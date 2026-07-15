@@ -81,22 +81,19 @@ body {
   height: 100vh;
   overflow-y: auto;
 }
+/* Logo oficial (letreiro vetorial) numa plaquinha clara sobre o gradiente. */
 .sidebar-marca {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 1.15rem 1.1rem 1rem;
-  background: none;
+  display: block;
+  width: auto;
+  margin: 0.9rem 0.8rem 0.5rem;
+  padding: 0.7rem 0.9rem;
+  background: #fff;
   border: none;
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
   cursor: pointer;
-  text-align: left;
-  width: 100%;
-  color: #fff;
 }
-.sidebar-marca img { height: 42px; width: auto; flex-shrink: 0; }
-.sidebar-marca__texto { display: flex; flex-direction: column; line-height: 1.05; }
-.sidebar-marca__nome { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.3px; }
-.sidebar-marca__sub { font-size: 0.62rem; letter-spacing: 3px; color: #bff1f0; }
+.sidebar-marca img { display: block; width: 100%; height: auto; }
 
 .sidebar-nav { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.4rem 0.6rem 1rem; flex: 1; }
 .sidebar-grupo {
@@ -588,8 +585,6 @@ body {
   position: relative;
   overflow: hidden;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
   background: var(--grad-marca);
   color: #fff;
 }
@@ -600,17 +595,35 @@ body {
   height: 100%;
   object-fit: cover;
 }
+/* Conteúdo por cima do vídeo: logo (plaquinha) no topo, slogan na base.
+   O scrim escurece só topo e base para legibilidade, deixando o vídeo à mostra. */
 .login-arte__conteudo {
   position: relative;
   z-index: 1;
-  padding: 2.5rem;
-  background: linear-gradient(0deg, rgba(5, 46, 89, 0.9) 0%, rgba(5, 46, 89, 0.35) 55%, rgba(5, 46, 89, 0) 100%);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2rem;
+  background: linear-gradient(180deg, rgba(5, 46, 89, 0.45) 0%, rgba(5, 46, 89, 0) 22%, rgba(5, 46, 89, 0) 58%, rgba(5, 46, 89, 0.9) 100%);
 }
-.login-arte__logo { display: flex; align-items: center; gap: 0.85rem; }
-.login-arte__logo img { height: 60px; width: auto; }
-.login-arte__logo b { font-size: 1.7rem; font-weight: 800; line-height: 1; }
-.login-arte__logo span { display: block; font-size: 0.68rem; letter-spacing: 4px; color: #bff1f0; margin-top: 0.2rem; }
-.login-arte__slogan { margin: 0.9rem 0 0; font-size: 1.05rem; line-height: 1.4; max-width: 32ch; color: #eaf6ff; }
+.login-arte__logo {
+  align-self: flex-start;
+  background: #fff;
+  border-radius: var(--raio);
+  padding: 0.7rem 1rem;
+  box-shadow: var(--sombra-forte);
+}
+.login-arte__logo img { display: block; height: 52px; width: auto; }
+.login-arte__slogan {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  max-width: 34ch;
+  color: #eaf6ff;
+  text-shadow: 0 1px 6px rgba(5, 46, 89, 0.85);
+}
 
 .login-form-lado {
   display: flex;
@@ -634,10 +647,10 @@ body {
 
 /* No celular, o painel de arte vira uma faixa curta no topo. */
 @media (max-width: 760px) {
-  .tela-login { grid-template-columns: 1fr; grid-template-rows: 170px auto; }
-  .login-arte__conteudo { padding: 1.25rem 1.5rem; }
-  .login-arte__logo img { height: 44px; }
-  .login-arte__logo b { font-size: 1.35rem; }
+  .tela-login { grid-template-columns: 1fr; grid-template-rows: 180px auto; }
+  .login-arte__conteudo { padding: 1rem 1.25rem; justify-content: flex-start; }
+  .login-arte__logo { padding: 0.5rem 0.75rem; }
+  .login-arte__logo img { height: 36px; }
   .login-arte__slogan { display: none; }
 }
 
