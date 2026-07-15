@@ -667,9 +667,8 @@ body {
   position: relative;
   overflow: hidden;
   display: flex;
-  /* Fundo claro (aproxima o do vídeo) — as sobras do 'contain' não ficam
-     como barras azuis; o vídeo aparece inteiro e logo/slogan ficam legíveis. */
-  background: linear-gradient(180deg, #ffffff 0%, #e9f1f9 100%);
+  /* Fundo branco = mesmo fundo do vídeo → 100% liso, sem barras nem emenda. */
+  background: #ffffff;
   color: var(--cor-primaria-escura);
 }
 .login-video {
@@ -708,9 +707,10 @@ body {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: var(--cor-fundo);
+  background: #ffffff;
 }
-.form-login { width: 100%; max-width: 380px; margin: 0; }
+/* Sombra reforçada para o cartão se destacar sobre a página branca. */
+.form-login { width: 100%; max-width: 380px; margin: 0; box-shadow: var(--sombra-media); }
 .form-login h1 { margin: 0 0 0.25rem; }
 .subtitulo-login { margin: 0 0 1.25rem; color: var(--cor-texto-suave); font-size: 0.9rem; }
 .form-login .btn { width: 100%; margin-top: 0.5rem; }
