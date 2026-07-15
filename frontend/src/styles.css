@@ -391,32 +391,57 @@ body {
 
 .form-acoes { display: flex; gap: 0.6rem; flex-wrap: wrap; }
 
-/* ---- Botões ---- */
+/* ---- Botões (kit) ----
+   Base neutra (outline) + variantes: primário, gradiente, suave e perigo.
+   Ícone e texto alinhados (inline-flex); hover com leve elevação. */
 .btn {
   font: inherit;
-  font-weight: 600;
-  padding: 0.55rem 1rem;
+  font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.58rem 1.05rem;
   border: 1px solid var(--cor-borda-forte);
   border-radius: var(--raio-pequeno);
   background: #fff;
   color: var(--cor-texto);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.16s ease, transform 0.12s ease, color 0.15s ease;
 }
-.btn:hover { background: #f1f5fb; border-color: var(--cor-primaria); }
+.btn:hover { background: #eef4fb; border-color: var(--cor-primaria); color: var(--cor-primaria-escura); }
 .btn:active { transform: translateY(1px); }
-.btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.btn:disabled:hover { background: #fff; border-color: var(--cor-borda-forte); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.btn:disabled:hover { background: #fff; border-color: var(--cor-borda-forte); color: var(--cor-texto); }
+
 .btn--primario {
   background: var(--cor-primaria);
   border-color: var(--cor-primaria);
   color: #fff;
-  box-shadow: 0 1px 2px rgba(8, 110, 189, 0.3);
+  box-shadow: 0 2px 6px rgba(8, 110, 189, 0.28);
 }
-.btn--primario:hover { background: var(--cor-primaria-escura); border-color: var(--cor-primaria-escura); }
-.btn--perigo { color: var(--cor-perigo); border-color: #e5b4b1; }
-.btn--perigo:hover { background: var(--cor-perigo-clara); border-color: var(--cor-perigo); }
-.btn--pequeno { padding: 0.35rem 0.7rem; font-size: 0.85rem; }
+.btn--primario:hover { background: #0a63aa; border-color: #0a63aa; color: #fff; box-shadow: 0 6px 16px rgba(8, 110, 189, 0.32); transform: translateY(-1px); }
+.btn--primario:active { transform: translateY(0); }
+
+.btn--gradiente {
+  background: var(--grad-marca);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(11, 110, 180, 0.28);
+}
+.btn--gradiente:hover { color: #fff; box-shadow: 0 8px 20px rgba(11, 110, 180, 0.34); transform: translateY(-1px); }
+
+.btn--suave {
+  background: var(--cor-primaria-clara);
+  border-color: transparent;
+  color: #08528f;
+}
+.btn--suave:hover { background: #d8e9f9; border-color: transparent; color: #08528f; }
+
+.btn--perigo { color: var(--cor-perigo); border-color: #e5b4b1; background: #fff; }
+.btn--perigo:hover { background: var(--cor-perigo-clara); border-color: var(--cor-perigo); color: var(--cor-perigo); }
+
+.btn--pequeno { padding: 0.38rem 0.75rem; font-size: 0.85rem; }
 .btn--voltar { margin-bottom: 1rem; }
 
 /* ---- Menu suspenso (dropdown do cabeçalho) ---- */
@@ -540,12 +565,26 @@ body {
 
 /* ---- Selos (badges) com contraste adequado ---- */
 .badge {
-  display: inline-block;
-  padding: 0.15rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.62rem;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 700;
+  line-height: 1.25;
   border: 1px solid transparent;
+}
+/* Ponto de severidade (cor do próprio texto) nos selos de nível e status —
+   deixa o estado legível num relance. */
+.badge--nivel-baixo::before, .badge--nivel-medio::before, .badge--nivel-alto::before,
+.badge--status-aberto::before, .badge--status-em_andamento::before, .badge--status-resolvido::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
 }
 /* Nível de risco */
 .badge--nivel-baixo   { background: #e6f4ea; color: #1b5e2f; border-color: #b7dfc4; }
