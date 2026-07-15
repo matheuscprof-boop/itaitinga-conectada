@@ -2,6 +2,7 @@
 // a própria senha.
 import { useState } from 'react';
 import { api, ROTULOS } from '../api.js';
+import CampoSenha from '../components/CampoSenha.jsx';
 
 export default function MinhaConta({ usuario }) {
   const [form, setForm] = useState({ senha_atual: '', nova_senha: '', confirmar: '' });
@@ -51,21 +52,32 @@ export default function MinhaConta({ usuario }) {
         {erro && <p className="alerta-erro" role="alert">{erro}</p>}
         {aviso && <p className="alerta-sucesso" role="status">{aviso}</p>}
 
-        <div className="campo">
-          <label htmlFor="senha-atual">Senha atual</label>
-          <input id="senha-atual" type="password" autoComplete="current-password" required
-            value={form.senha_atual} onChange={(e) => alterar('senha_atual', e.target.value)} />
-        </div>
-        <div className="campo">
-          <label htmlFor="nova-senha">Nova senha (mín. 6 caracteres)</label>
-          <input id="nova-senha" type="password" autoComplete="new-password" required minLength={6}
-            value={form.nova_senha} onChange={(e) => alterar('nova_senha', e.target.value)} />
-        </div>
-        <div className="campo">
-          <label htmlFor="confirmar-senha">Confirmar nova senha</label>
-          <input id="confirmar-senha" type="password" autoComplete="new-password" required minLength={6}
-            value={form.confirmar} onChange={(e) => alterar('confirmar', e.target.value)} />
-        </div>
+        <CampoSenha
+          id="senha-atual"
+          label="Senha atual"
+          autoComplete="current-password"
+          required
+          value={form.senha_atual}
+          onChange={(e) => alterar('senha_atual', e.target.value)}
+        />
+        <CampoSenha
+          id="nova-senha"
+          label="Nova senha (mín. 6 caracteres)"
+          autoComplete="new-password"
+          required
+          minLength={6}
+          value={form.nova_senha}
+          onChange={(e) => alterar('nova_senha', e.target.value)}
+        />
+        <CampoSenha
+          id="confirmar-senha"
+          label="Confirmar nova senha"
+          autoComplete="new-password"
+          required
+          minLength={6}
+          value={form.confirmar}
+          onChange={(e) => alterar('confirmar', e.target.value)}
+        />
 
         <div className="form-acoes">
           <button type="submit" className="btn btn--primario" disabled={salvando}>

@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS alunos (
   nome                  TEXT    NOT NULL,
   matricula             TEXT    NOT NULL UNIQUE,   -- identificador escolar único
   turma                 TEXT    NOT NULL,          -- ex.: "9º A"
+  foto                  TEXT,                      -- caminho da foto do estudante (/uploads)
   sexo                  TEXT    CHECK (sexo IN ('feminino', 'masculino', 'outro')),
   data_nascimento       TEXT,                      -- formato ISO: AAAA-MM-DD
   responsavel_nome      TEXT,
@@ -76,6 +77,10 @@ CREATE TABLE IF NOT EXISTS alertas (
   aluno_id      INTEGER NOT NULL,
   eixo          TEXT    NOT NULL CHECK (eixo IN ('frequencia', 'desempenho', 'socioemocional')),
   nivel         TEXT    NOT NULL CHECK (nivel IN ('baixo', 'medio', 'alto')),
+  -- Categoria opcional (bullying, racismo, misoginia, LGBTfobia, …). Sem CHECK
+  -- de propósito: a lista pode crescer sem exigir reconstrução da tabela; a
+  -- validação fica na API (constants.js → CATEGORIAS_ALERTA).
+  categoria     TEXT,
   titulo        TEXT    NOT NULL,
   descricao     TEXT,
   status        TEXT    NOT NULL DEFAULT 'aberto'
@@ -221,6 +226,20 @@ CREATE TABLE IF NOT EXISTS vida_escolar_aluno (
   FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
 );
 
+-- Boletins por bimestre (até 1 arquivo por bimestre, substituível). O par
+-- (aluno_id, bimestre) é único: reenviar troca o boletim daquele bimestre.
+CREATE TABLE IF NOT EXISTS boletins (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  aluno_id      INTEGER NOT NULL,
+  bimestre      INTEGER NOT NULL CHECK (bimestre IN (1, 2, 3, 4)),
+  arquivo       TEXT    NOT NULL,               -- caminho relativo em /uploads
+  nome_original TEXT,                            -- nome do arquivo enviado
+  autor_nome    TEXT,
+  criado_em     TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (aluno_id, bimestre),
+  FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
+);
+
 -- Diário de bordo: fotos do aluno (N por aluno).
 CREATE TABLE IF NOT EXISTS logbook_fotos (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -273,6 +292,7 @@ CREATE TABLE IF NOT EXISTS alertas_infra (
 CREATE INDEX IF NOT EXISTS idx_sintomas_aluno   ON saude_sintomas (aluno_id);
 CREATE INDEX IF NOT EXISTS idx_sintomas_data    ON saude_sintomas (data);
 CREATE INDEX IF NOT EXISTS idx_logbook_aluno    ON logbook_fotos (aluno_id);
+CREATE INDEX IF NOT EXISTS idx_boletins_aluno   ON boletins (aluno_id);
 CREATE INDEX IF NOT EXISTS idx_documentos_aluno ON aluno_documentos (aluno_id);
 CREATE INDEX IF NOT EXISTS idx_infra_categoria  ON alertas_infra (categoria);
 CREATE INDEX IF NOT EXISTS idx_infra_status     ON alertas_infra (status);

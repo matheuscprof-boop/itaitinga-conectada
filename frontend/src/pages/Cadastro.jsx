@@ -2,6 +2,7 @@
 // privilegiados (equipe/gestão/secretaria) ainda ficam pendentes de aprovação.
 import { useEffect, useState } from 'react';
 import { api, ROTULOS } from '../api.js';
+import CampoSenha from '../components/CampoSenha.jsx';
 
 // Perfis oferecidos no autocadastro (na ordem exibida).
 const PERFIS = ['cidadao', 'professor', 'coordenacao', 'secretaria_escolar', 'direcao', 'secretaria'];
@@ -112,11 +113,15 @@ export default function Cadastro({ onVoltar, onRegistrado }) {
             onChange={(e) => setEmail(e.target.value)} />
         </div>
 
-        <div className="campo">
-          <label htmlFor="senha">Senha</label>
-          <input id="senha" type="password" autoComplete="new-password" required value={senha}
-            onChange={(e) => setSenha(e.target.value)} />
-        </div>
+        <CampoSenha
+          id="senha"
+          label="Senha (mín. 6 caracteres)"
+          autoComplete="new-password"
+          required
+          minLength={6}
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+        />
 
         {!ehCidadao && (
           <>

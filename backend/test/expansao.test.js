@@ -341,6 +341,92 @@ test('Eixo C: desmarcar PcD limpa a condição', async () => {
   assert.equal(put.dados.pcd_condicao, null);
 });
 
+test('Eixo C: boletim por bimestre (upload, listagem e remoção)', async () => {
+  const fd = new FormData();
+  fd.append('arquivo', new Blob([Buffer.from('%PDF-1.4 boletim')], { type: 'application/pdf' }), 'b2.pdf');
+  const up = await fetch(`${base}/api/vida-escolar/${estado.alunos[0]}/boletim/2`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${estado.adminToken}` },
+    body: fd,
+  });
+  assert.equal(up.status, 201);
+  const lista = await up.json();
+  assert.equal(lista.length, 1);
+  assert.equal(lista[0].bimestre, 2);
+  assert.match(lista[0].arquivo, /^\/uploads\//);
+
+  // Aparece na leitura da vida escolar.
+  const get = await api(`/api/vida-escolar/${estado.alunos[0]}`, { token: estado.adminToken });
+  assert.equal(get.dados.boletins.length, 1);
+
+  // Bimestre inválido é rejeitado.
+  const fdx = new FormData();
+  fdx.append('arquivo', new Blob([Buffer.from('x')], { type: 'application/pdf' }), 'x.pdf');
+  const inval = await fetch(`${base}/api/vida-escolar/${estado.alunos[0]}/boletim/9`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${estado.adminToken}` },
+    body: fdx,
+  });
+  assert.equal(inval.status, 400);
+
+  const del = await api(`/api/vida-escolar/${estado.alunos[0]}/boletim/2`, {
+    token: estado.adminToken, method: 'DELETE',
+  });
+  assert.equal(del.status, 200);
+  assert.equal(del.dados.length, 0);
+});
+
+test('Foto do estudante: upload, aparece no aluno e remoção', async () => {
+  const fd = new FormData();
+  fd.append('foto', new Blob([Buffer.from('89504E470D0A1A0A', 'hex')], { type: 'image/png' }), 'aluno.png');
+  const up = await fetch(`${base}/api/alunos/${estado.alunos[2]}/foto`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${estado.adminToken}` },
+    body: fd,
+  });
+  assert.equal(up.status, 201);
+  const aluno = await up.json();
+  assert.match(aluno.foto, /^\/uploads\//);
+
+  const get = await api(`/api/alunos/${estado.alunos[2]}`, { token: estado.adminToken });
+  assert.match(get.dados.foto, /^\/uploads\//);
+
+  const del = await api(`/api/alunos/${estado.alunos[2]}/foto`, {
+    token: estado.adminToken, method: 'DELETE',
+  });
+  assert.equal(del.status, 200);
+  assert.equal(del.dados.foto, null);
+});
+
+test('Alerta: categoria opcional é gravada (válida) e ignorada (inválida)', async () => {
+  const comCat = await api('/api/alertas', {
+    token: estado.adminToken,
+    method: 'POST',
+    body: { aluno_id: estado.alunos[0], eixo: 'socioemocional', nivel: 'alto', categoria: 'bullying', titulo: 'Caso de bullying' },
+  });
+  assert.equal(comCat.status, 201);
+  assert.equal(comCat.dados.categoria, 'bullying');
+
+  const catInvalida = await api('/api/alertas', {
+    token: estado.adminToken,
+    method: 'POST',
+    body: { aluno_id: estado.alunos[0], eixo: 'socioemocional', nivel: 'baixo', categoria: 'inexistente', titulo: 'Sem categoria' },
+  });
+  assert.equal(catInvalida.status, 201);
+  assert.equal(catInvalida.dados.categoria, null);
+
+  // O relatório agrega por categoria (só as definidas).
+  const resumo = await api('/api/relatorios/resumo', { token: estado.adminToken });
+  assert.ok(Array.isArray(resumo.dados.por_categoria));
+  assert.ok(resumo.dados.por_categoria.some((c) => c.categoria === 'bullying' && c.total >= 1));
+});
+
+test('Referências: expõe as categorias de alerta', async () => {
+  const ref = await api('/api/referencias');
+  assert.equal(ref.dados.categorias_alerta.bullying, 'Bullying');
+  assert.equal(ref.dados.categorias_alerta.lgbtfobia, 'LGBTfobia');
+});
+
 // Lê o código de verificação diretamente do banco (compartilhado com o server).
 function codigoDe(email) {
   return db.prepare('SELECT codigo_verificacao FROM usuarios WHERE email = ?').get(email)?.codigo_verificacao;

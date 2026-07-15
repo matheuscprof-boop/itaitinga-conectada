@@ -1,6 +1,7 @@
 // Tela de login. Ao autenticar, chama onLogin(usuario).
 import { useState } from 'react';
 import { api } from '../api.js';
+import CampoSenha from '../components/CampoSenha.jsx';
 
 export default function Login({ onLogin, onCadastrar, onPortal, onPrecisaVerificar }) {
   const [email, setEmail] = useState('');
@@ -82,17 +83,14 @@ export default function Login({ onLogin, onCadastrar, onPortal, onPrecisaVerific
           />
         </div>
 
-        <div className="campo">
-          <label htmlFor="senha">Senha</label>
-          <input
-            id="senha"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-          />
-        </div>
+        <CampoSenha
+          id="senha"
+          label="Senha"
+          autoComplete="current-password"
+          required
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+        />
 
         <button type="submit" className="btn btn--primario" disabled={entrando}>
           {entrando ? 'Entrando…' : 'Entrar'}

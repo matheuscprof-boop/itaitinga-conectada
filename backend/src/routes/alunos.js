@@ -2,10 +2,13 @@
 // Base: /api/alunos
 
 import { Router } from 'express';
+import { unlink } from 'node:fs/promises';
+import { join } from 'node:path';
 import db from '../db.js';
 import { exigirPerfil } from '../auth.js';
 import { PERFIS_GESTAO, SEXOS } from '../constants.js';
 import { escolaEfetiva, ehMunicipal } from '../escopo.js';
+import { uploadFoto, caminhoPublico, UPLOADS_DIR } from '../uploads.js';
 
 const router = Router();
 
@@ -45,6 +48,14 @@ const atualizar = db.prepare(`
 `);
 
 const remover = db.prepare('DELETE FROM alunos WHERE id = ?');
+const definirFoto = db.prepare("UPDATE alunos SET foto = @foto, atualizado_em = datetime('now') WHERE id = @id");
+
+// Remove o arquivo físico de uma foto antiga (ignora se já não existir).
+async function removerArquivo(caminhoPub) {
+  if (!caminhoPub) return;
+  const nome = caminhoPub.replace(/^\/uploads\//, '');
+  await unlink(join(UPLOADS_DIR, nome)).catch(() => {});
+}
 
 function normalizarAluno(body) {
   // Sexo é opcional; só aceita os valores conhecidos (senão fica nulo).
@@ -172,6 +183,29 @@ router.delete('/:id', podeGerenciar, (req, res) => {
   }
   remover.run(atual.id);
   res.status(204).end();
+});
+
+// POST /api/alunos/:id/foto  → envia/troca a foto do estudante (campo "foto")
+router.post('/:id/foto', podeGerenciar, uploadFoto, async (req, res) => {
+  const atual = obterPorId.get(req.params.id);
+  if (!atual || !podeAcessar(req, atual)) {
+    return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  }
+  if (!req.file) return res.status(400).json({ erro: 'Envie uma imagem no campo "foto".' });
+  definirFoto.run({ id: atual.id, foto: caminhoPublico(req.file) });
+  await removerArquivo(atual.foto); // remove a foto substituída
+  res.status(201).json(obterPorId.get(atual.id));
+});
+
+// DELETE /api/alunos/:id/foto  → remove a foto do estudante
+router.delete('/:id/foto', podeGerenciar, async (req, res) => {
+  const atual = obterPorId.get(req.params.id);
+  if (!atual || !podeAcessar(req, atual)) {
+    return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  }
+  definirFoto.run({ id: atual.id, foto: null });
+  await removerArquivo(atual.foto);
+  res.json(obterPorId.get(atual.id));
 });
 
 export default router;

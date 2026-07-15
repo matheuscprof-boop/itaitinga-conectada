@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import db from '../db.js';
-import { EIXOS, NIVEIS, STATUS, PERFIS_GESTAO } from '../constants.js';
+import { EIXOS, NIVEIS, STATUS, CATEGORIAS_ALERTA, PERFIS_GESTAO } from '../constants.js';
 import { exigirPerfil } from '../auth.js';
 import { montarFiltrosAlertas } from '../filtros.js';
 import { notificarAlertaAlto } from '../notificador.js';
@@ -34,8 +34,8 @@ function alertaNoEscopo(req, alertaId) {
 }
 
 const inserir = db.prepare(`
-  INSERT INTO alertas (aluno_id, eixo, nivel, titulo, descricao)
-  VALUES (@aluno_id, @eixo, @nivel, @titulo, @descricao)
+  INSERT INTO alertas (aluno_id, eixo, nivel, categoria, titulo, descricao)
+  VALUES (@aluno_id, @eixo, @nivel, @categoria, @titulo, @descricao)
 `);
 
 const atualizarStatus = db.prepare(`
@@ -118,10 +118,13 @@ router.get('/resumo', (req, res) => {
 
 // POST /api/alertas  → registra um novo alerta (qualquer usuário autenticado)
 router.post('/', (req, res) => {
+  // Categoria é opcional; só aceita valores conhecidos (senão fica nula).
+  const categoria = CATEGORIAS_ALERTA.includes(req.body.categoria) ? req.body.categoria : null;
   const dados = {
     aluno_id: Number(req.body.aluno_id),
     eixo: req.body.eixo,
     nivel: req.body.nivel,
+    categoria,
     titulo: (req.body.titulo ?? '').trim(),
     descricao: req.body.descricao || null,
   };

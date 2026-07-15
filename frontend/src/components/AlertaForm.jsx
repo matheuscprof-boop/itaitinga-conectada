@@ -5,9 +5,16 @@ import { ROTULOS } from '../api.js';
 
 const EIXOS = ['frequencia', 'desempenho', 'socioemocional'];
 const NIVEIS = ['baixo', 'medio', 'alto'];
+// Categorias opcionais (bullying, racismo, …), na ordem exibida.
+const CATEGORIAS = [
+  'bullying', 'racismo', 'misoginia', 'lgbtfobia', 'homofobia', 'capacitismo',
+  'xenofobia', 'intolerancia_religiosa', 'violencia', 'outro',
+];
+
+const FORM_VAZIO = { eixo: 'frequencia', nivel: 'medio', categoria: '', titulo: '', descricao: '' };
 
 export default function AlertaForm({ alunoId, onSalvar }) {
-  const [form, setForm] = useState({ eixo: 'frequencia', nivel: 'medio', titulo: '', descricao: '' });
+  const [form, setForm] = useState(FORM_VAZIO);
   const [erro, setErro] = useState('');
   const [salvando, setSalvando] = useState(false);
 
@@ -21,7 +28,7 @@ export default function AlertaForm({ alunoId, onSalvar }) {
     setSalvando(true);
     try {
       await onSalvar({ ...form, aluno_id: alunoId });
-      setForm({ eixo: 'frequencia', nivel: 'medio', titulo: '', descricao: '' });
+      setForm(FORM_VAZIO);
     } catch (err) {
       setErro(err.message);
     } finally {
@@ -57,6 +64,18 @@ export default function AlertaForm({ alunoId, onSalvar }) {
             {NIVEIS.map((valor) => (
               <option key={valor} value={valor}>
                 {ROTULOS.nivel[valor]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="campo">
+          <label htmlFor="categoria">Categoria (opcional)</label>
+          <select id="categoria" value={form.categoria} onChange={(e) => alterar('categoria', e.target.value)}>
+            <option value="">— Nenhuma —</option>
+            {CATEGORIAS.map((valor) => (
+              <option key={valor} value={valor}>
+                {ROTULOS.categoriaAlerta[valor]}
               </option>
             ))}
           </select>

@@ -1,8 +1,15 @@
-// Eixo C — Vida Escolar do aluno: frequência, desempenho, projetos e o
-// Diário de Bordo (fotos).
+// Eixo C — Vida Escolar do aluno: frequência, desempenho, projetos, educação
+// inclusiva (PcD/PEI) e os boletins por bimestre.
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
-import Logbook from './Logbook.jsx';
+
+// Os 4 bimestres do ano letivo (rótulo exibido → número enviado à API).
+const BIMESTRES = [
+  { n: 1, rotulo: '1º bimestre' },
+  { n: 2, rotulo: '2º bimestre' },
+  { n: 3, rotulo: '3º bimestre' },
+  { n: 4, rotulo: '4º bimestre' },
+];
 
 export default function VidaEscolarAluno({ alunoId, podeEditar = true }) {
   const [dados, setDados] = useState(null);
@@ -13,6 +20,27 @@ export default function VidaEscolarAluno({ alunoId, podeEditar = true }) {
     api.obterVidaEscolar(alunoId).then(setDados).catch((e) => setErro(e.message));
   }
   useEffect(carregar, [alunoId]);
+
+  // Anexa/troca o boletim de um bimestre; a API devolve a lista atualizada.
+  async function enviarBoletim(bimestre, file) {
+    if (!file) return;
+    setErro(''); setOk('');
+    const fd = new FormData();
+    fd.append('arquivo', file);
+    try {
+      const boletins = await api.enviarBoletim(alunoId, bimestre, fd);
+      setDados((d) => ({ ...d, boletins }));
+      setOk(`Boletim do ${bimestre}º bimestre anexado.`);
+    } catch (err) { setErro(err.message); }
+  }
+  async function removerBoletim(bimestre) {
+    if (!confirm(`Remover o boletim do ${bimestre}º bimestre?`)) return;
+    setErro(''); setOk('');
+    try {
+      const boletins = await api.removerBoletim(alunoId, bimestre);
+      setDados((d) => ({ ...d, boletins }));
+    } catch (err) { setErro(err.message); }
+  }
 
   async function salvar(e) {
     e.preventDefault();
@@ -126,7 +154,34 @@ export default function VidaEscolarAluno({ alunoId, podeEditar = true }) {
       </form>
 
       <div className="card">
-        <Logbook alunoId={alunoId} fotos={dados.fotos || []} podeEditar={podeEditar} onAtualizar={carregar} />
+        <h3>Boletins por bimestre</h3>
+        <p className="dica-campo">Anexe o boletim de cada bimestre (imagem ou PDF).</p>
+        <ul className="boletins-lista" role="list">
+          {BIMESTRES.map(({ n, rotulo }) => {
+            const boletim = (dados.boletins || []).find((b) => b.bimestre === n);
+            return (
+              <li key={n} className="boletim-item">
+                <span className="boletim-item__rotulo">{rotulo}</span>
+                <div className="anexo-saude">
+                  {boletim ? (
+                    <span className="anexo-saude__atual">
+                      <a href={boletim.arquivo} target="_blank" rel="noreferrer">📎 Ver boletim</a>
+                      {podeEditar && (
+                        <button type="button" className="btn btn--link" onClick={() => removerBoletim(n)}>remover</button>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="vazio">Nenhum boletim anexado.</span>
+                  )}
+                  {podeEditar && (
+                    <input type="file" accept="image/*,application/pdf"
+                      onChange={(e) => { enviarBoletim(n, e.target.files[0]); e.target.value = ''; }} />
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </div>
   );

@@ -38,6 +38,22 @@ const salvarPei = db.prepare(`
     atualizado_em = datetime('now')
 `);
 
+// --- Boletins por bimestre (1 arquivo por bimestre, substituível) ---
+const listarBoletins = db.prepare(
+  'SELECT id, bimestre, arquivo, nome_original, autor_nome, criado_em FROM boletins WHERE aluno_id = ? ORDER BY bimestre'
+);
+const obterBoletim = db.prepare('SELECT * FROM boletins WHERE aluno_id = ? AND bimestre = ?');
+const upsertBoletim = db.prepare(`
+  INSERT INTO boletins (aluno_id, bimestre, arquivo, nome_original, autor_nome)
+  VALUES (@aluno_id, @bimestre, @arquivo, @nome_original, @autor_nome)
+  ON CONFLICT(aluno_id, bimestre) DO UPDATE SET
+    arquivo = excluded.arquivo,
+    nome_original = excluded.nome_original,
+    autor_nome = excluded.autor_nome,
+    criado_em = datetime('now')
+`);
+const removerBoletim = db.prepare('DELETE FROM boletins WHERE aluno_id = ? AND bimestre = ?');
+
 const listarFotos = db.prepare(
   'SELECT * FROM logbook_fotos WHERE aluno_id = ? ORDER BY criado_em DESC, id DESC'
 );
@@ -76,6 +92,7 @@ router.get('/:alunoId', (req, res) => {
     pei: null,
   };
   dados.fotos = listarFotos.all(aluno.id);
+  dados.boletins = listarBoletins.all(aluno.id);
   res.json(dados);
 });
 
@@ -122,6 +139,46 @@ router.delete('/:alunoId/pei', async (req, res) => {
   salvarPei.run({ aluno_id: aluno.id, arquivo: null });
   await removerArquivo(atual);
   res.json(obter.get(aluno.id));
+});
+
+// --- Boletins por bimestre ---
+// Valida e normaliza o número do bimestre (1..4) do parâmetro de rota.
+function bimestreValido(v) {
+  const n = Number(v);
+  return [1, 2, 3, 4].includes(n) ? n : null;
+}
+
+// POST /api/vida-escolar/:alunoId/boletim/:bimestre → anexa/troca (campo "arquivo")
+router.post('/:alunoId/boletim/:bimestre', uploadDocumento, async (req, res) => {
+  const aluno = alunoNoEscopo(req, req.params.alunoId);
+  if (!aluno) return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  const bimestre = bimestreValido(req.params.bimestre);
+  if (!bimestre) return res.status(400).json({ erro: 'Bimestre inválido. Use 1, 2, 3 ou 4.' });
+  if (!req.file) return res.status(400).json({ erro: 'Envie um arquivo no campo "arquivo".' });
+
+  const anterior = obterBoletim.get(aluno.id, bimestre)?.arquivo;
+  upsertBoletim.run({
+    aluno_id: aluno.id,
+    bimestre,
+    arquivo: caminhoPublico(req.file),
+    nome_original: req.file.originalname || null,
+    autor_nome: req.usuario?.nome ?? null,
+  });
+  await removerArquivo(anterior); // remove o boletim substituído
+  res.status(201).json(listarBoletins.all(aluno.id));
+});
+
+// DELETE /api/vida-escolar/:alunoId/boletim/:bimestre → remove o boletim
+router.delete('/:alunoId/boletim/:bimestre', async (req, res) => {
+  const aluno = alunoNoEscopo(req, req.params.alunoId);
+  if (!aluno) return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  const bimestre = bimestreValido(req.params.bimestre);
+  if (!bimestre) return res.status(400).json({ erro: 'Bimestre inválido. Use 1, 2, 3 ou 4.' });
+
+  const atual = obterBoletim.get(aluno.id, bimestre)?.arquivo;
+  removerBoletim.run(aluno.id, bimestre);
+  await removerArquivo(atual);
+  res.json(listarBoletins.all(aluno.id));
 });
 
 // GET /api/vida-escolar/:alunoId/fotos → galeria do diário de bordo

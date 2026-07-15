@@ -4,6 +4,26 @@
 export const EIXOS = ['frequencia', 'desempenho', 'socioemocional'];
 export const NIVEIS = ['baixo', 'medio', 'alto'];
 export const STATUS = ['aberto', 'em_andamento', 'resolvido'];
+
+// Categoria opcional do alerta do estudante — tipifica situações de violência e
+// discriminação (mais comuns no eixo Socioemocional, mas disponível em qualquer
+// eixo). Sem CHECK no banco: a lista pode crescer sem reconstruir a tabela.
+export const CATEGORIAS_ALERTA = [
+  'bullying', 'racismo', 'misoginia', 'lgbtfobia', 'homofobia', 'capacitismo',
+  'xenofobia', 'intolerancia_religiosa', 'violencia', 'outro',
+];
+export const CATEGORIAS_ALERTA_LABEL = {
+  bullying: 'Bullying',
+  racismo: 'Racismo',
+  misoginia: 'Misoginia',
+  lgbtfobia: 'LGBTfobia',
+  homofobia: 'Homofobia',
+  capacitismo: 'Capacitismo',
+  xenofobia: 'Xenofobia',
+  intolerancia_religiosa: 'Intolerância religiosa',
+  violencia: 'Violência',
+  outro: 'Outro',
+};
 export const PERFIS = ['professor', 'coordenacao', 'direcao', 'secretaria', 'secretaria_escolar', 'cidadao'];
 
 // Sexo do aluno (opcional). Usado para exibir campos específicos — ex.: a marcação

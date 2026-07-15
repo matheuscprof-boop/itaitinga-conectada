@@ -134,6 +134,9 @@ export const api = {
   atualizarAluno: (id, dados) =>
     requisicao(`/alunos/${id}`, { method: 'PUT', body: JSON.stringify(dados) }),
   removerAluno: (id) => requisicao(`/alunos/${id}`, { method: 'DELETE' }),
+  // Foto do estudante — multipart, campo "foto".
+  enviarFotoAluno: (id, formData) => requisicaoForm(`/alunos/${id}/foto`, formData, 'POST'),
+  removerFotoAluno: (id) => requisicao(`/alunos/${id}/foto`, { method: 'DELETE' }),
 
   // --- Alertas ---
   listarAlertas: (filtros = {}) => {
@@ -173,19 +176,20 @@ export const api = {
   geocodificar: (endereco) =>
     requisicao(`/geo/geocodificar?endereco=${encodeURIComponent(endereco)}`),
 
-  // --- Eixo C: Vida Escolar + Diário de Bordo ---
+  // --- Eixo C: Vida Escolar ---
   obterVidaEscolar: (alunoId) => requisicao(`/vida-escolar/${alunoId}`),
   salvarVidaEscolar: (alunoId, dados) =>
     requisicao(`/vida-escolar/${alunoId}`, { method: 'PUT', body: JSON.stringify(dados) }),
-  enviarFotoLogbook: (alunoId, formData) =>
-    requisicaoForm(`/vida-escolar/${alunoId}/fotos`, formData, 'POST'),
-  removerFotoLogbook: (fotoId) =>
-    requisicao(`/vida-escolar/fotos/${fotoId}`, { method: 'DELETE' }),
   // Anexo do PEI (Plano Educacional Individualizado) — multipart, campo "arquivo".
   enviarPei: (alunoId, formData) =>
     requisicaoForm(`/vida-escolar/${alunoId}/pei`, formData, 'POST'),
   removerPei: (alunoId) =>
     requisicao(`/vida-escolar/${alunoId}/pei`, { method: 'DELETE' }),
+  // Boletins por bimestre (1..4) — multipart, campo "arquivo".
+  enviarBoletim: (alunoId, bimestre, formData) =>
+    requisicaoForm(`/vida-escolar/${alunoId}/boletim/${bimestre}`, formData, 'POST'),
+  removerBoletim: (alunoId, bimestre) =>
+    requisicao(`/vida-escolar/${alunoId}/boletim/${bimestre}`, { method: 'DELETE' }),
 
   // --- Documentos do aluno ---
   listarDocumentos: (alunoId) => requisicao(`/documentos/${alunoId}`),
@@ -256,6 +260,19 @@ export const ROTULOS = {
   nivel: { baixo: 'Baixo', medio: 'Médio', alto: 'Alto' },
   status: { aberto: 'Aberto', em_andamento: 'Em andamento', resolvido: 'Resolvido' },
   sexo: { feminino: 'Feminino', masculino: 'Masculino', outro: 'Outro' },
+  // Categorias opcionais do alerta do estudante (violência/discriminação).
+  categoriaAlerta: {
+    bullying: 'Bullying',
+    racismo: 'Racismo',
+    misoginia: 'Misoginia',
+    lgbtfobia: 'LGBTfobia',
+    homofobia: 'Homofobia',
+    capacitismo: 'Capacitismo',
+    xenofobia: 'Xenofobia',
+    intolerancia_religiosa: 'Intolerância religiosa',
+    violencia: 'Violência',
+    outro: 'Outro',
+  },
   perfil: {
     professor: 'Professor(a)',
     coordenacao: 'Coordenação',

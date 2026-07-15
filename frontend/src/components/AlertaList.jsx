@@ -85,6 +85,11 @@ function AlertaItem({ alerta, podeRemover, onMudarStatus, onRemover }) {
       <div className="alerta-topo">
         <strong>{alerta.titulo}</strong>
         <div className="alerta-selos">
+          {alerta.categoria && (
+            <span className="badge badge--categoria">
+              {ROTULOS.categoriaAlerta[alerta.categoria] || alerta.categoria}
+            </span>
+          )}
           <Badge tipo="nivel" valor={alerta.nivel} />
           <Badge tipo="status" valor={alerta.status} />
         </div>

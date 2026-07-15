@@ -36,7 +36,8 @@ describe('Cadastro (autocadastro)', () => {
     fireEvent.change(screen.getByLabelText(/Eu sou/i), { target: { value: 'professor' } });
     fireEvent.change(screen.getByLabelText(/Nome/i), { target: { value: 'Prof' } });
     fireEvent.change(screen.getByLabelText(/E-mail/i), { target: { value: 'p@e.com' } });
-    fireEvent.change(screen.getByLabelText(/Senha/i), { target: { value: 'senha123' } });
+    // /^Senha/i evita casar com o aria-label "Mostrar senha" do botão olhinho.
+    fireEvent.change(screen.getByLabelText(/^Senha/i), { target: { value: 'senha123' } });
     fireEvent.click(screen.getByRole('button', { name: /Criar conta/i }));
     expect(await screen.findByText(/Selecione a escola/i)).toBeInTheDocument();
     expect(api.registrar).not.toHaveBeenCalled();

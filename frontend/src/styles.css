@@ -1080,3 +1080,74 @@ body {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ===================================================================
+   Melhorias 2026-07-15: olhinho de senha, foto do aluno, boletins,
+   categoria de alerta, infra agrupada por status e resumo do relatório.
+   =================================================================== */
+
+/* Campo de senha com botão "olhinho" (mostrar/ocultar) */
+.campo-senha { position: relative; display: flex; align-items: center; }
+.campo-senha input { flex: 1; padding-right: 2.6rem; min-width: 0; }
+.campo-senha__olho {
+  position: absolute; right: 0.3rem; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; padding: 0.3rem 0.4rem;
+  font-size: 1.05rem; line-height: 1; border-radius: var(--raio-pequeno, 8px);
+}
+.campo-senha__olho:hover { background: var(--cor-primaria-clara, #e7f0fd); }
+.campo-senha__olho:focus-visible { outline: 2px solid var(--cor-primaria); outline-offset: 1px; }
+
+/* Foto do estudante (avatar no cartão + ações) */
+.aluno-identidade { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+.aluno-avatar {
+  width: 56px; height: 56px; flex: 0 0 auto; border-radius: 50%; overflow: hidden;
+  background: var(--grad-marca, linear-gradient(135deg, #086EBD, #0BACAE));
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.1rem; box-shadow: var(--sombra, 0 1px 3px rgba(0,0,0,0.12));
+}
+.aluno-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.aluno-foto-acoes { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.aluno-foto-botao { cursor: pointer; }
+
+/* Boletins por bimestre */
+.boletins-lista { list-style: none; padding: 0; margin: 0.5rem 0 0; display: grid; gap: 0.6rem; }
+.boletim-item {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  border: 1px solid var(--cor-borda); border-radius: var(--raio-pequeno, 8px); padding: 0.6rem 0.9rem;
+}
+.boletim-item__rotulo { font-weight: 600; min-width: 6.5rem; }
+
+/* Selo de categoria do alerta do estudante */
+.badge--categoria { background: #fbecec; color: #a02724; border-color: #e5b4b1; }
+
+/* Infra agrupada por status + resumo de contagens */
+.infra-agrupado { display: grid; gap: 1.25rem; }
+.infra-resumo { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+.infra-resumo__item {
+  border: 1px solid var(--cor-borda); border-radius: var(--raio, 12px); padding: 0.75rem 1rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.15rem; background: var(--cor-superficie-2, #f4f8fd);
+}
+.infra-resumo__item strong { font-size: 1.6rem; font-variant-numeric: tabular-nums; line-height: 1; }
+.infra-resumo__item span { font-size: 0.82rem; color: var(--cor-texto-suave); }
+.infra-resumo__item--aberto { border-top: 3px solid #c0392b; }
+.infra-resumo__item--em_andamento { border-top: 3px solid #b8860b; }
+.infra-resumo__item--resolvido { border-top: 3px solid #1b7f5a; }
+.infra-grupo { display: grid; gap: 0.75rem; }
+.infra-grupo__titulo { display: flex; align-items: center; gap: 0.6rem; margin: 0; font-size: 1rem; }
+.infra-grupo__contagem { color: var(--cor-texto-suave); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+
+/* Resumo do relatório de alertas (leitura rápida) */
+.relatorio-resumo { display: grid; gap: 0.75rem; margin-bottom: 1rem; }
+.relatorio-resumo__frase { margin: 0; font-size: 1rem; }
+.relatorio-destaques { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+.relatorio-destaque {
+  border: 1px solid var(--cor-borda); border-radius: var(--raio, 12px); padding: 0.75rem 1rem;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 0.5rem;
+  background: var(--cor-superficie-2, #f4f8fd);
+}
+.relatorio-destaque__valor { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.relatorio-destaque__rotulo { color: var(--cor-texto-suave); font-size: 0.9rem; }
+.relatorio-destaque__pct { font-weight: 600; color: var(--cor-texto-suave); font-variant-numeric: tabular-nums; }
+.relatorio-destaque--aberto { border-left: 4px solid #c0392b; }
+.relatorio-destaque--em_andamento { border-left: 4px solid #b8860b; }
+.relatorio-destaque--resolvido { border-left: 4px solid #1b7f5a; }

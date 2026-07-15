@@ -85,6 +85,7 @@ export default function AlunoDetalhe({ alunoId, perfil, onVoltar }) {
           podeGerenciar={gestor}
           onEditar={() => setEditando(true)}
           onRemover={removerAluno}
+          onAtualizar={carregar}
         />
       )}
 

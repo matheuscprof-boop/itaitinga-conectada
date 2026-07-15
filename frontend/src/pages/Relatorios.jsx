@@ -74,17 +74,31 @@ export default function Relatorios({ perfil }) {
       {carregando && <p className="vazio" role="status">Calculando…</p>}
 
       {/* --- Resultados --- */}
-      {resumo && (
+      {resumo && (resumo.total === 0 ? (
+        <p className="vazio" role="status">Nenhum alerta corresponde ao filtro atual.</p>
+      ) : (
         <>
-          <p className="total-alertas">
-            <strong>{resumo.total}</strong> alerta(s) no filtro atual.
-          </p>
+          <ResumoCabecalho resumo={resumo} />
 
           <div className="grupos-metricas">
-            <GrupoGrafico titulo="Por eixo" mapa={resumo.por_eixo} rotulos={ROTULOS.eixo} cor="#1f5fbf" />
-            <GrupoGrafico titulo="Por nível" mapa={resumo.por_nivel} rotulos={ROTULOS.nivel} cor="#b8860b" />
-            <GrupoGrafico titulo="Por status" mapa={resumo.por_status} rotulos={ROTULOS.status} cor="#1b7f5a" />
+            <GrupoGrafico titulo="Por eixo" ajuda="Dimensão pedagógica do alerta." mapa={resumo.por_eixo} rotulos={ROTULOS.eixo} cor="#1f5fbf" />
+            <GrupoGrafico titulo="Por nível de risco" ajuda="Gravidade atribuída ao alerta." mapa={resumo.por_nivel} rotulos={ROTULOS.nivel} cor="#b8860b" />
+            <GrupoGrafico titulo="Por situação" ajuda="Andamento do acompanhamento." mapa={resumo.por_status} rotulos={ROTULOS.status} cor="#1b7f5a" />
           </div>
+
+          {resumo.por_categoria?.length > 0 && (
+            <section aria-labelledby="titulo-por-categoria" className="card">
+              <h3 id="titulo-por-categoria">Por categoria (violência e discriminação)</h3>
+              <p className="dica-campo">Casos tipificados como bullying, racismo, LGBTfobia e afins.</p>
+              <BarChart
+                cor="#c0392b"
+                dados={resumo.por_categoria.map((linha) => ({
+                  rotulo: ROTULOS.categoriaAlerta[linha.categoria] || linha.categoria,
+                  valor: linha.total,
+                }))}
+              />
+            </section>
+          )}
 
           <section aria-labelledby="titulo-por-turma" className="card">
             <h3 id="titulo-por-turma">Por turma</h3>
@@ -98,13 +112,50 @@ export default function Relatorios({ perfil }) {
             )}
           </section>
         </>
-      )}
+      ))}
+    </div>
+  );
+}
+
+// Cabeçalho do resumo: frase legível + destaques (abertos / em andamento /
+// resolvidos com percentual), para leitura rápida de quem não é técnico.
+function ResumoCabecalho({ resumo }) {
+  const total = resumo.total;
+  const s = resumo.por_status || {};
+  const abertos = s.aberto || 0;
+  const emAndamento = s.em_andamento || 0;
+  const resolvidos = s.resolvido || 0;
+  const pct = (n) => (total ? Math.round((n / total) * 100) : 0);
+  const pendentes = abertos + emAndamento;
+
+  return (
+    <div className="relatorio-resumo">
+      <p className="relatorio-resumo__frase">
+        No filtro atual há <strong>{total}</strong> alerta(s): <strong>{pendentes}</strong> ainda
+        em acompanhamento ({pct(pendentes)}%) e <strong>{resolvidos}</strong> já resolvido(s)
+        ({pct(resolvidos)}%).
+      </p>
+      <div className="relatorio-destaques">
+        <Destaque rotulo="Abertos" valor={abertos} pct={pct(abertos)} classe="aberto" />
+        <Destaque rotulo="Em andamento" valor={emAndamento} pct={pct(emAndamento)} classe="em_andamento" />
+        <Destaque rotulo="Resolvidos" valor={resolvidos} pct={pct(resolvidos)} classe="resolvido" />
+      </div>
+    </div>
+  );
+}
+
+function Destaque({ rotulo, valor, pct, classe }) {
+  return (
+    <div className={`relatorio-destaque relatorio-destaque--${classe}`}>
+      <span className="relatorio-destaque__valor">{valor}</span>
+      <span className="relatorio-destaque__rotulo">{rotulo}</span>
+      <span className="relatorio-destaque__pct">{pct}%</span>
     </div>
   );
 }
 
 // Card com um gráfico de barras a partir de um mapa { chave: total }.
-function GrupoGrafico({ titulo, mapa, rotulos, cor }) {
+function GrupoGrafico({ titulo, ajuda, mapa, rotulos, cor }) {
   const dados = Object.entries(mapa).map(([chave, total]) => ({
     rotulo: rotulos[chave] ?? chave,
     valor: total,
@@ -112,6 +163,7 @@ function GrupoGrafico({ titulo, mapa, rotulos, cor }) {
   return (
     <div className="card grupo-metrica">
       <h3>{titulo}</h3>
+      {ajuda && <p className="dica-campo">{ajuda}</p>}
       <BarChart dados={dados} cor={cor} />
     </div>
   );

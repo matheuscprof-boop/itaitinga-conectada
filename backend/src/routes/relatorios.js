@@ -6,7 +6,7 @@
 import { Router } from 'express';
 import db from '../db.js';
 import { montarFiltrosAlertas } from '../filtros.js';
-import { EIXOS, NIVEIS, STATUS } from '../constants.js';
+import { EIXOS, NIVEIS, STATUS, CATEGORIAS_ALERTA } from '../constants.js';
 import { filtrosComEscola, escolaEfetiva } from '../escopo.js';
 
 const router = Router();
@@ -40,12 +40,22 @@ router.get('/resumo', (req, res) => {
     .prepare(`SELECT a.turma AS turma, COUNT(*) AS total ${base}${where} GROUP BY a.turma ORDER BY total DESC`)
     .all(params);
 
+  // Por categoria (bullying/racismo/…): só conta alertas com categoria definida,
+  // e devolve apenas as categorias presentes (ordenadas por total desc).
+  const porCategoriaMapa = contarPor('categoria', where, params);
+  delete porCategoriaMapa[null]; // ignora os alertas sem categoria
+  const porCategoria = Object.entries(porCategoriaMapa)
+    .filter(([chave]) => CATEGORIAS_ALERTA.includes(chave))
+    .map(([categoria, total]) => ({ categoria, total }))
+    .sort((a, b) => b.total - a.total);
+
   res.json({
     total,
     por_eixo: completar(contarPor('eixo', where, params), EIXOS),
     por_nivel: completar(contarPor('nivel', where, params), NIVEIS),
     por_status: completar(contarPor('status', where, params), STATUS),
     por_turma: porTurma,
+    por_categoria: porCategoria,
   });
 });
 
@@ -54,13 +64,13 @@ router.get('/alertas.csv', (req, res) => {
   const { where, params } = montarFiltrosAlertas(filtrosComEscola(req));
   const linhas = db
     .prepare(
-      `SELECT al.id, a.nome AS aluno, a.turma, al.eixo, al.nivel, al.titulo,
+      `SELECT al.id, a.nome AS aluno, a.turma, al.eixo, al.nivel, al.categoria, al.titulo,
               al.status, al.criado_em
        ${base}${where} ORDER BY al.criado_em DESC`
     )
     .all(params);
 
-  const colunas = ['id', 'aluno', 'turma', 'eixo', 'nivel', 'titulo', 'status', 'criado_em'];
+  const colunas = ['id', 'aluno', 'turma', 'eixo', 'nivel', 'categoria', 'titulo', 'status', 'criado_em'];
   const csv = [
     colunas.join(','),
     ...linhas.map((linha) => colunas.map((c) => formatarCampoCsv(linha[c])).join(',')),

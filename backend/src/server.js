@@ -30,6 +30,7 @@ import {
   EIXOS_LABEL, PERFIS_LABEL, NIVEIS, STATUS, PERFIS_GESTAO,
   CATEGORIAS_INFRA_LABEL, STATUS_INFRA, VACINACAO_STATUS, PERFIL_CIDADAO,
   CATEGORIAS_DOCUMENTO_LABEL, VACINAS_LABEL, DOENCAS_PREEXISTENTES_LABEL, SEXOS_LABEL,
+  CATEGORIAS_ALERTA_LABEL,
 } from './constants.js';
 
 garantirAdminPadrao(); // cria o admin padrão se não houver usuários
@@ -57,6 +58,7 @@ app.get('/api/referencias', (_req, res) => {
     perfis: PERFIS_LABEL,
     niveis: NIVEIS,
     status: STATUS,
+    categorias_alerta: CATEGORIAS_ALERTA_LABEL,
     categorias_infra: CATEGORIAS_INFRA_LABEL,
     status_infra: STATUS_INFRA,
     vacinacao_status: VACINACAO_STATUS,

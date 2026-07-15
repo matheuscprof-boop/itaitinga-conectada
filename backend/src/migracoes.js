@@ -21,6 +21,12 @@ export function migrar(db) {
   // 1b) Sexo do aluno (opcional; habilita os campos de gestação p/ alunas).
   garantirColuna(db, 'alunos', 'sexo', 'TEXT');
 
+  // 1c) Foto do estudante (caminho em /uploads).
+  garantirColuna(db, 'alunos', 'foto', 'TEXT');
+
+  // 1d) Categoria opcional do alerta (bullying, racismo, …) para bancos antigos.
+  garantirColuna(db, 'alertas', 'categoria', 'TEXT');
+
   // 2) Coluna de situação da conta ('ativo'/'pendente') para bancos antigos.
   garantirColuna(db, 'usuarios', 'status', "TEXT NOT NULL DEFAULT 'ativo'");
 
