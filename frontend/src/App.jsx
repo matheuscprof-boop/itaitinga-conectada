@@ -18,7 +18,6 @@ import Analitico from './pages/Analitico.jsx';
 import Mapa from './pages/Mapa.jsx';
 import PanoramaSaude from './pages/PanoramaSaude.jsx';
 import Escolas from './pages/Escolas.jsx';
-import MenuSuspenso from './components/MenuSuspenso.jsx';
 import Usuarios from './pages/Usuarios.jsx';
 import MinhaConta from './pages/MinhaConta.jsx';
 import Notificacoes from './pages/Notificacoes.jsx';
@@ -29,6 +28,7 @@ export default function App() {
   const [naoLidas, setNaoLidas] = useState(0);
   const [telaPublica, setTelaPublica] = useState('login'); // login | cadastro | portal | verificar
   const [emailPendente, setEmailPendente] = useState(''); // e-mail em verificação
+  const [menuAberto, setMenuAberto] = useState(false); // gaveta do menu lateral (celular)
   // view = { tela: 'dashboard' | 'detalhe' | 'relatorios' | 'infraestrutura' | ... }
   const [view, setView] = useState({ tela: 'dashboard' });
 
@@ -82,8 +82,34 @@ export default function App() {
     setView({ tela: 'dashboard' });
   }
 
+  function irPara(tela) {
+    setView({ tela });
+    setMenuAberto(false);
+  }
+
+  // Item do menu lateral. Fecha a gaveta ao navegar (no celular).
+  function ItemNav({ tela, icone, rotulo, badge }) {
+    const ativo = view.tela === tela;
+    return (
+      <button
+        className={`sidebar-item ${ativo ? 'sidebar-item--ativo' : ''}`}
+        onClick={() => irPara(tela)}
+        aria-current={ativo ? 'page' : undefined}
+      >
+        <span className="sidebar-item__icone" aria-hidden="true">{icone}</span>
+        <span className="sidebar-item__rotulo">{rotulo}</span>
+        {badge > 0 && <span className="contador-nav" aria-label={`${badge} não lidas`}>{badge}</span>}
+      </button>
+    );
+  }
+
   if (carregando) {
-    return <p className="vazio" role="status" style={{ padding: '2rem' }}>Carregando…</p>;
+    return (
+      <div className="tela-carregando" role="status" aria-label="Carregando">
+        <video src="/marca/tela-carregamento.mp4" autoPlay muted loop playsInline aria-hidden="true" />
+        <p>Carregando…</p>
+      </div>
+    );
   }
 
   // --- Não autenticado: login / cadastro / portal público ---
@@ -130,110 +156,81 @@ export default function App() {
     <>
       <a href="#conteudo" className="pular-para-conteudo">Pular para o conteúdo</a>
 
-      <header className="cabecalho-app">
-        <div className="cabecalho-conteudo">
+      <div className={`app-shell ${menuAberto ? 'menu-aberto' : ''}`}>
+        <button
+          className="sidebar-overlay"
+          aria-label="Fechar menu"
+          tabIndex={menuAberto ? 0 : -1}
+          onClick={() => setMenuAberto(false)}
+        />
+
+        <aside className="sidebar">
           <button
-            className="logo"
-            onClick={() => setView({ tela: cidadao ? 'infraestrutura' : 'dashboard' })}
+            className="sidebar-marca"
+            onClick={() => irPara(cidadao ? 'infraestrutura' : 'dashboard')}
             aria-label="Ir para a página inicial"
           >
-            Itaitinga Conectada
+            <img src="/marca/simbolo.svg" alt="" />
+            <span className="sidebar-marca__texto">
+              <span className="sidebar-marca__nome">Itaitinga</span>
+              <span className="sidebar-marca__sub">CONECTADA</span>
+            </span>
           </button>
 
-          <nav className="nav-principal" aria-label="Navegação principal">
+          <nav className="sidebar-nav" aria-label="Navegação principal">
             {cidadao ? (
-              <button
-                className={`nav-item ${view.tela === 'infraestrutura' ? 'nav-item--ativo' : ''}`}
-                onClick={() => setView({ tela: 'infraestrutura' })}
-              >
-                Infraestrutura
-              </button>
+              <>
+                <ItemNav tela="infraestrutura" icone="🛠️" rotulo="Infraestrutura" />
+                <ItemNav tela="conta" icone="👤" rotulo="Minha conta" />
+              </>
             ) : (
               <>
-                <button
-                  className={`nav-item ${view.tela === 'dashboard' ? 'nav-item--ativo' : ''}`}
-                  onClick={() => setView({ tela: 'dashboard' })}
-                >
-                  Início
-                </button>
+                <p className="sidebar-grupo">Acompanhamento</p>
+                <ItemNav tela="dashboard" icone="🏠" rotulo="Início" />
+                <ItemNav tela="relatorios" icone="📄" rotulo="Relatórios" />
+                <ItemNav tela="analitico" icone="📊" rotulo="Painel analítico" />
+                <ItemNav tela="mapa" icone="🗺️" rotulo="Mapa das escolas" />
 
-                {/* Grupo "Análises": relatórios, painel analítico e mapa. */}
-                <MenuSuspenso
-                  rotulo="Análises"
-                  ativo={['relatorios', 'analitico', 'mapa'].includes(view.tela)}
-                >
-                  <button className="menu-suspenso__item" onClick={() => setView({ tela: 'relatorios' })}>
-                    Relatórios
-                  </button>
-                  <button className="menu-suspenso__item" onClick={() => setView({ tela: 'analitico' })}>
-                    Painel analítico
-                  </button>
-                  <button className="menu-suspenso__item" onClick={() => setView({ tela: 'mapa' })}>
-                    Mapa das escolas
-                  </button>
-                </MenuSuspenso>
+                <p className="sidebar-grupo">Cidadania</p>
+                {gestao && <ItemNav tela="saude" icone="🩺" rotulo="Saúde" />}
+                <ItemNav tela="infraestrutura" icone="🛠️" rotulo="Infraestrutura" />
+                {gestao && <ItemNav tela="notificacoes" icone="🔔" rotulo="Notificações" badge={naoLidas} />}
 
-                {gestao && (
-                  <button
-                    className={`nav-item ${view.tela === 'saude' ? 'nav-item--ativo' : ''}`}
-                    onClick={() => setView({ tela: 'saude' })}
-                  >
-                    Saúde
-                  </button>
-                )}
-                <button
-                  className={`nav-item ${view.tela === 'infraestrutura' ? 'nav-item--ativo' : ''}`}
-                  onClick={() => setView({ tela: 'infraestrutura' })}
-                >
-                  Infraestrutura
-                </button>
-                {gestao && (
-                  <button
-                    className={`nav-item ${view.tela === 'notificacoes' ? 'nav-item--ativo' : ''}`}
-                    onClick={() => setView({ tela: 'notificacoes' })}
-                  >
-                    Notificações
-                    {naoLidas > 0 && <span className="contador-nav" aria-label={`${naoLidas} não lidas`}>{naoLidas}</span>}
-                  </button>
-                )}
-
-                {/* Grupo "Gestão": cadastros administrativos (escolas e usuários). */}
                 {(usuario.perfil === 'secretaria' || usuario.perfil === 'direcao') && (
-                  <MenuSuspenso
-                    rotulo="Gestão"
-                    ativo={['escolas', 'usuarios'].includes(view.tela)}
-                  >
-                    {usuario.perfil === 'secretaria' && (
-                      <button className="menu-suspenso__item" onClick={() => setView({ tela: 'escolas' })}>
-                        Escolas
-                      </button>
-                    )}
-                    <button className="menu-suspenso__item" onClick={() => setView({ tela: 'usuarios' })}>
-                      Usuários
-                    </button>
-                  </MenuSuspenso>
+                  <>
+                    <p className="sidebar-grupo">Gestão</p>
+                    {usuario.perfil === 'secretaria' && <ItemNav tela="escolas" icone="🏫" rotulo="Escolas" />}
+                    <ItemNav tela="usuarios" icone="👥" rotulo="Usuários" />
+                  </>
                 )}
+
+                <p className="sidebar-grupo">Conta</p>
+                <ItemNav tela="conta" icone="👤" rotulo="Minha conta" />
               </>
             )}
-            <button
-              className={`nav-item ${view.tela === 'conta' ? 'nav-item--ativo' : ''}`}
-              onClick={() => setView({ tela: 'conta' })}
-            >
-              Minha conta
-            </button>
           </nav>
+        </aside>
 
-          <div className="usuario-box">
-            <span className="usuario-nome">
-              {usuario.nome}
-              <span className="usuario-perfil">{ROTULOS.perfil[usuario.perfil]}</span>
-            </span>
-            <button className="btn btn--pequeno" onClick={sair}>Sair</button>
-          </div>
-        </div>
-      </header>
+        <div className="area-principal">
+          <header className="topbar">
+            <button
+              className="topbar__menu-btn"
+              onClick={() => setMenuAberto((a) => !a)}
+              aria-label="Abrir menu"
+              aria-expanded={menuAberto}
+            >
+              ☰
+            </button>
+            <div className="topbar__saudacao">
+              <span className="topbar__ola">Olá, {usuario.nome.split(' ')[0]}</span>
+              <span className="topbar__perfil">{ROTULOS.perfil[usuario.perfil]}</span>
+            </div>
+            <div className="topbar__acoes">
+              <button className="btn btn--pequeno" onClick={sair}>Sair</button>
+            </div>
+          </header>
 
-      <main id="conteudo" className="conteudo">
+          <main id="conteudo" className="conteudo">
         {/* Telas de equipe */}
         {!cidadao && view.tela === 'dashboard' && (
           <Dashboard
@@ -266,31 +263,81 @@ export default function App() {
         {view.tela === 'conta' && <MinhaConta usuario={usuario} />}
       </main>
 
-      <footer className="rodape-app">
-        <p>Itaitinga Conectada · Educação e cidadania com foco em acessibilidade</p>
-      </footer>
+          <footer className="rodape-app">
+            <p>Itaitinga Conectada · Educação e cidadania com foco em acessibilidade</p>
+          </footer>
+        </div>
+      </div>
     </>
   );
 }
 
-// Cabeçalho mínimo para o portal público (usuário não autenticado).
+// Shell do portal público (usuário não autenticado) — mesmo layout de menu
+// lateral da área logada, com itens reduzidos ao acesso público.
 function PortalPublicoShell({ children, onVoltar }) {
+  const [menuAberto, setMenuAberto] = useState(false);
   return (
     <>
-      <header className="cabecalho-app">
-        <div className="cabecalho-conteudo">
-          <button className="logo" onClick={onVoltar} aria-label="Voltar ao login">
-            Itaitinga Conectada
+      <a href="#conteudo" className="pular-para-conteudo">Pular para o conteúdo</a>
+
+      <div className={`app-shell ${menuAberto ? 'menu-aberto' : ''}`}>
+        <button
+          className="sidebar-overlay"
+          aria-label="Fechar menu"
+          tabIndex={menuAberto ? 0 : -1}
+          onClick={() => setMenuAberto(false)}
+        />
+
+        <aside className="sidebar">
+          <button className="sidebar-marca" onClick={onVoltar} aria-label="Ir para o login">
+            <img src="/marca/simbolo.svg" alt="" />
+            <span className="sidebar-marca__texto">
+              <span className="sidebar-marca__nome">Itaitinga</span>
+              <span className="sidebar-marca__sub">CONECTADA</span>
+            </span>
           </button>
-          <nav className="nav-principal">
-            <button className="nav-item" onClick={onVoltar}>← Login</button>
+
+          <nav className="sidebar-nav" aria-label="Navegação principal">
+            <p className="sidebar-grupo">Portal público</p>
+            <button className="sidebar-item sidebar-item--ativo" aria-current="page">
+              <span className="sidebar-item__icone" aria-hidden="true">🛠️</span>
+              <span className="sidebar-item__rotulo">Infraestrutura</span>
+            </button>
+
+            <p className="sidebar-grupo">Acesso</p>
+            <button className="sidebar-item" onClick={onVoltar}>
+              <span className="sidebar-item__icone" aria-hidden="true">🔑</span>
+              <span className="sidebar-item__rotulo">Entrar</span>
+            </button>
           </nav>
+        </aside>
+
+        <div className="area-principal">
+          <header className="topbar">
+            <button
+              className="topbar__menu-btn"
+              onClick={() => setMenuAberto((a) => !a)}
+              aria-label="Abrir menu"
+              aria-expanded={menuAberto}
+            >
+              ☰
+            </button>
+            <div className="topbar__saudacao">
+              <span className="topbar__ola">Portal público</span>
+              <span className="topbar__perfil">Infraestrutura e cidadania</span>
+            </div>
+            <div className="topbar__acoes">
+              <button className="btn btn--primario btn--pequeno" onClick={onVoltar}>Entrar</button>
+            </div>
+          </header>
+
+          <main id="conteudo" className="conteudo">{children}</main>
+
+          <footer className="rodape-app">
+            <p>Itaitinga Conectada · Portal público de infraestrutura</p>
+          </footer>
         </div>
-      </header>
-      <main id="conteudo" className="conteudo">{children}</main>
-      <footer className="rodape-app">
-        <p>Itaitinga Conectada · Portal público de infraestrutura</p>
-      </footer>
+      </div>
     </>
   );
 }

@@ -30,6 +30,30 @@ export default function Login({ onLogin, onCadastrar, onPortal, onPrecisaVerific
 
   return (
     <div className="tela-login">
+      <aside className="login-arte">
+        <video
+          className="login-video"
+          src="/marca/logo-animada.mp4"
+          autoPlay
+          muted
+          playsInline
+          aria-hidden="true"
+        />
+        <div className="login-arte__conteudo">
+          <div className="login-arte__logo">
+            <img src="/marca/simbolo.svg" alt="" />
+            <span>
+              <b>Itaitinga</b>
+              <span>CONECTADA</span>
+            </span>
+          </div>
+          <p className="login-arte__slogan">
+            Inovação maker para a cidadania integral — educação, saúde e cidadania de Itaitinga em um só lugar.
+          </p>
+        </div>
+      </aside>
+
+      <div className="login-form-lado">
       <form className="card form form-login" onSubmit={enviar} aria-labelledby="titulo-login">
         <h1 id="titulo-login">Entrar no Itaitinga Conectada</h1>
         <p className="subtitulo-login">Acompanhamento estudantil e cidadania em Itaitinga</p>
@@ -95,6 +119,7 @@ export default function Login({ onLogin, onCadastrar, onPortal, onPrecisaVerific
           )}
         </div>
       </form>
+      </div>
     </div>
   );
 }

@@ -11,16 +11,23 @@
   --cor-borda-forte: #cbd5e1;
   --cor-texto: #172033;
   --cor-texto-suave: #5b6675;
-  --cor-primaria: #2563c9;
-  --cor-primaria-escura: #16409a;
-  --cor-primaria-clara: #eaf1fc;
-  --cor-acento: #0e9384;      /* teal — destaques/positivo */
+  /* Cores oficiais da marca Itaitinga Conectada (extraídas do vetor). */
+  --cor-primaria: #086EBD;         /* azul da marca */
+  --cor-primaria-escura: #052E59;  /* azul-marinho (texto/figura da marca) */
+  --cor-primaria-clara: #e7f1fb;
+  --cor-acento: #0BACAE;           /* teal — "CONECTADA"/destaques */
+  --cor-acento-escura: #0b8b8d;
+  --cor-verde: #46AD37;            /* verde da marca */
+  --cor-amarelo: #F7B409;          /* amarelo da marca */
   --cor-perigo: #c22a20;
   --cor-perigo-clara: #fbecec;
+  /* Gradiente da marca — usado na sidebar e nos painéis de destaque. */
+  --grad-marca: linear-gradient(170deg, #052E59 0%, #086EBD 48%, #0BACAE 100%);
   --raio: 12px;
   --raio-pequeno: 8px;
-  --sombra: 0 1px 2px rgba(23, 32, 51, 0.05), 0 4px 12px rgba(23, 32, 51, 0.06);
-  --sombra-forte: 0 8px 28px rgba(23, 32, 51, 0.14);
+  --sombra: 0 1px 2px rgba(5, 46, 89, 0.05), 0 4px 12px rgba(5, 46, 89, 0.07);
+  --sombra-forte: 0 8px 28px rgba(5, 46, 89, 0.16);
+  --largura-sidebar: 244px;
   --fonte: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -56,11 +63,137 @@ body {
   top: 0.5rem;
 }
 
-/* ---- Cabeçalho e rodapé ---- */
-.cabecalho-app {
-  background: linear-gradient(120deg, var(--cor-primaria-escura), var(--cor-primaria));
+/* =====================================================================
+   Shell da aplicação: menu lateral (sidebar) + barra superior + conteúdo
+   ===================================================================== */
+.app-shell { display: flex; min-height: 100vh; }
+
+/* ---- Menu lateral ---- */
+.sidebar {
+  width: var(--largura-sidebar);
+  flex-shrink: 0;
+  background: var(--grad-marca);
   color: #fff;
-  box-shadow: 0 2px 10px rgba(23, 32, 51, 0.12);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.sidebar-marca {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.15rem 1.1rem 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: #fff;
+}
+.sidebar-marca img { height: 42px; width: auto; flex-shrink: 0; }
+.sidebar-marca__texto { display: flex; flex-direction: column; line-height: 1.05; }
+.sidebar-marca__nome { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.3px; }
+.sidebar-marca__sub { font-size: 0.62rem; letter-spacing: 3px; color: #bff1f0; }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.4rem 0.6rem 1rem; flex: 1; }
+.sidebar-grupo {
+  margin: 0.85rem 0 0.25rem;
+  padding: 0 0.65rem;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: rgba(255, 255, 255, 0.55);
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.88);
+  font: inherit;
+  font-weight: 500;
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.sidebar-item:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
+.sidebar-item--ativo { background: #fff; color: var(--cor-primaria-escura); font-weight: 700; box-shadow: var(--sombra); }
+.sidebar-item--ativo:hover { background: #fff; color: var(--cor-primaria-escura); }
+.sidebar-item__icone { font-size: 1.05rem; width: 1.4rem; text-align: center; flex-shrink: 0; }
+.sidebar-item__rotulo { flex: 1; min-width: 0; }
+.sidebar-item .contador-nav { margin-left: 0; background: var(--cor-amarelo); color: #3a2a00; }
+.sidebar-item--ativo .contador-nav { background: var(--cor-perigo); color: #fff; }
+
+/* ---- Área principal (barra superior + conteúdo) ---- */
+.area-principal { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.5rem;
+  background: var(--cor-superficie);
+  border-bottom: 1px solid var(--cor-borda);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.topbar__menu-btn {
+  display: none;
+  font-size: 1.35rem;
+  line-height: 1;
+  background: none;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pequeno);
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+  color: var(--cor-primaria-escura);
+}
+.topbar__saudacao { display: flex; flex-direction: column; line-height: 1.2; }
+.topbar__ola { font-weight: 700; color: var(--cor-primaria-escura); }
+.topbar__perfil { font-size: 0.8rem; color: var(--cor-texto-suave); }
+.topbar__acoes { margin-left: auto; display: flex; align-items: center; gap: 0.6rem; }
+
+.conteudo {
+  flex: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 1.75rem auto;
+  padding: 0 1.5rem;
+}
+
+.rodape-app {
+  max-width: 1180px;
+  width: 100%;
+  margin: 1rem auto 2rem;
+  padding: 1rem 1.5rem;
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Fundo escurecido atrás da gaveta no celular. */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 46, 89, 0.45);
+  z-index: 40;
+  border: none;
+}
+
+/* ---- Cabeçalho do portal público (não autenticado) ---- */
+.cabecalho-app {
+  background: var(--grad-marca);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(5, 46, 89, 0.14);
 }
 .cabecalho-conteudo {
   max-width: 1080px;
@@ -72,30 +205,36 @@ body {
   flex-wrap: wrap;
 }
 .logo {
-  font-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 0.3px;
   background: none;
   border: none;
   color: #fff;
   cursor: pointer;
   padding: 0;
 }
+.logo img { height: 36px; width: auto; }
 .subtitulo { margin: 0; color: #cddcf3; font-size: 0.95rem; }
 
-.conteudo {
-  max-width: 1080px;
-  margin: 1.75rem auto;
-  padding: 0 1.25rem;
-}
-
-.rodape-app {
-  max-width: 1080px;
-  margin: 2rem auto;
-  padding: 1rem 1.25rem;
-  color: var(--cor-texto-suave);
-  font-size: 0.85rem;
-  text-align: center;
+/* ---- Responsivo: sidebar vira gaveta deslizante no celular ---- */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: var(--sombra-forte);
+  }
+  .app-shell.menu-aberto .sidebar { transform: translateX(0); }
+  .app-shell.menu-aberto .sidebar-overlay { display: block; }
+  .topbar__menu-btn { display: inline-block; }
 }
 
 /* ---- Cartões genéricos ---- */
@@ -169,7 +308,7 @@ body {
 .campo textarea:focus {
   outline: none;
   border-color: var(--cor-primaria);
-  box-shadow: 0 0 0 3px rgba(37, 99, 201, 0.15);
+  box-shadow: 0 0 0 3px rgba(8, 110, 189, 0.18);
 }
 .campo textarea { resize: vertical; }
 .campo--busca { max-width: 480px; }
@@ -238,7 +377,7 @@ body {
   background: var(--cor-primaria);
   border-color: var(--cor-primaria);
   color: #fff;
-  box-shadow: 0 1px 2px rgba(37, 99, 201, 0.3);
+  box-shadow: 0 1px 2px rgba(8, 110, 189, 0.3);
 }
 .btn--primario:hover { background: var(--cor-primaria-escura); border-color: var(--cor-primaria-escura); }
 .btn--perigo { color: var(--cor-perigo); border-color: #e5b4b1; }
@@ -425,9 +564,55 @@ body {
 .usuario-nome { color: #fff; font-size: 0.85rem; display: flex; flex-direction: column; line-height: 1.2; }
 .usuario-perfil { color: #cddcf3; font-size: 0.75rem; }
 
-/* ---- Tela de login ---- */
+/* ---- Tela de carregamento inicial (vídeo do logo animado) ---- */
+.tela-carregando {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: var(--grad-marca);
+  color: #fff;
+}
+.tela-carregando video { width: min(320px, 72vw); height: auto; }
+.tela-carregando p { margin: 0; font-weight: 600; letter-spacing: 0.5px; }
+
+/* ---- Tela de login em dois painéis (arte com vídeo + formulário) ---- */
 .tela-login {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+}
+.login-arte {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: var(--grad-marca);
+  color: #fff;
+}
+.login-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.login-arte__conteudo {
+  position: relative;
+  z-index: 1;
+  padding: 2.5rem;
+  background: linear-gradient(0deg, rgba(5, 46, 89, 0.9) 0%, rgba(5, 46, 89, 0.35) 55%, rgba(5, 46, 89, 0) 100%);
+}
+.login-arte__logo { display: flex; align-items: center; gap: 0.85rem; }
+.login-arte__logo img { height: 60px; width: auto; }
+.login-arte__logo b { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+.login-arte__logo span { display: block; font-size: 0.68rem; letter-spacing: 4px; color: #bff1f0; margin-top: 0.2rem; }
+.login-arte__slogan { margin: 0.9rem 0 0; font-size: 1.05rem; line-height: 1.4; max-width: 32ch; color: #eaf6ff; }
+
+.login-form-lado {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -445,6 +630,15 @@ body {
   background: #f0f3f8;
   padding: 0.6rem 0.8rem;
   border-radius: 6px;
+}
+
+/* No celular, o painel de arte vira uma faixa curta no topo. */
+@media (max-width: 760px) {
+  .tela-login { grid-template-columns: 1fr; grid-template-rows: 170px auto; }
+  .login-arte__conteudo { padding: 1.25rem 1.5rem; }
+  .login-arte__logo img { height: 44px; }
+  .login-arte__logo b { font-size: 1.35rem; }
+  .login-arte__slogan { display: none; }
 }
 
 /* ---- Linha do tempo (histórico do alerta) ---- */
@@ -732,6 +926,9 @@ body {
 
 /* ---- Impressão (Relatórios → PDF) ---- */
 @media print {
+  .sidebar,
+  .topbar,
+  .sidebar-overlay,
   .cabecalho-app,
   .rodape-app,
   .nao-imprimir,
@@ -739,6 +936,7 @@ body {
     display: none !important;
   }
   body { background: #fff; }
+  .app-shell { display: block; }
   .conteudo { margin: 0; max-width: none; padding: 0; }
   .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
   .grupos-metricas { grid-template-columns: 1fr 1fr; }
